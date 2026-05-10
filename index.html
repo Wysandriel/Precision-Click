@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Precision Click｜精準點擊</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <p class="brand">WSR / NØDE:02</p>
+      <h1>Precision Click</h1>
+      <p class="subtitle">在限定時間內點擊隨機出現的目標，測試你的反應速度、專注力與點擊準確度。</p>
+    </section>
+
+    <section class="panel">
+      <div class="stats">
+        <div class="stat-card">
+          <span>分數</span>
+          <strong id="score">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>時間</span>
+          <strong><span id="time">30</span>s</strong>
+        </div>
+        <div class="stat-card">
+          <span>連擊</span>
+          <strong id="streak">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>最高分</span>
+          <strong id="bestScore">0</strong>
+        </div>
+      </div>
+
+      <div id="gameBoard" class="game-board" aria-label="Precision Click 遊戲區域">
+        <div id="startScreen" class="overlay">
+          <h2>準備好了嗎？</h2>
+          <p>點擊白色目標得分，點錯位置會扣分。目標越快點中，分數越高。</p>
+          <button id="startBtn" class="primary-btn">開始遊戲</button>
+        </div>
+
+        <div id="endScreen" class="overlay hidden">
+          <h2>遊戲結束</h2>
+          <p id="resultText">你的分數是 0</p>
+          <button id="restartBtn" class="primary-btn">再玩一次</button>
+        </div>
+
+        <button id="target" class="target hidden" aria-label="點擊目標"></button>
+      </div>
+
+      <div class="info-row">
+        <p>命中：<strong id="hits">0</strong></p>
+        <p>失誤：<strong id="misses">0</strong></p>
+        <p>平均反應：<strong id="avgReaction">0ms</strong></p>
+      </div>
+    </section>
+
+    <section class="how-to-play">
+      <h2>遊戲規則</h2>
+      <ul>
+        <li>限時 30 秒。</li>
+        <li>點擊白色目標可以得分。</li>
+        <li>反應越快，速度加成越高。</li>
+        <li>連續命中會增加連擊加成。</li>
+        <li>點錯位置會扣分並中斷連擊。</li>
+      </ul>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
