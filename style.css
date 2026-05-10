@@ -879,3 +879,169 @@ h1 {
     display: none;
   }
 }
+
+
+.quick-rules {
+  margin-top: 18px;
+  padding: 13px 15px;
+  border: 1px solid rgba(255, 209, 102, 0.22);
+  border-radius: 18px;
+  color: var(--muted);
+  background: rgba(255, 209, 102, 0.055);
+  line-height: 1.6;
+}
+
+.quick-rules strong {
+  color: var(--gold);
+}
+
+.rules-card {
+  width: min(980px, 100%);
+}
+
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 22px 0;
+}
+
+.rules-grid article,
+.target-rules,
+.scoring-box,
+.mode-rules {
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.rules-grid article {
+  padding: 18px;
+}
+
+.rule-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 28px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  color: #050711;
+  background: var(--gold);
+  font-size: 0.76rem;
+  font-weight: 1000;
+}
+
+.rules-grid h3,
+.target-rules h3,
+.scoring-box h3,
+.mode-rules h3 {
+  margin: 0 0 10px;
+}
+
+.rules-grid p,
+.scoring-box li,
+.mode-rules span,
+.target-rule-list span {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.target-rules,
+.scoring-box,
+.mode-rules {
+  padding: 18px;
+  margin-top: 14px;
+}
+
+.target-rule-list {
+  display: grid;
+  gap: 10px;
+}
+
+.target-rule-list div,
+.mode-rules div {
+  display: grid;
+  grid-template-columns: auto 120px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.target-rule-list strong,
+.mode-rules strong {
+  color: var(--text);
+}
+
+.scoring-box ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.scoring-box li {
+  margin: 8px 0;
+}
+
+.mode-rules {
+  display: grid;
+  gap: 10px;
+}
+
+.mode-rules div {
+  grid-template-columns: 110px 1fr;
+}
+
+@media (max-width: 1040px) {
+  .rules-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .target-rule-list div {
+    grid-template-columns: auto 110px 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .rules-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .target-rule-list div,
+  .mode-rules div {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+
+  .target-rule-list .dot {
+    margin-bottom: 2px;
+  }
+}
+
+
+/* Bugfix: 排行榜中的評級徽章使用小尺寸，避免沿用結算大徽章造成版面擠壓 */
+.leader-row .rank-badge {
+  min-width: 54px;
+  height: 38px;
+  border-radius: 14px;
+  padding: 0 10px;
+  font-size: 0.95rem;
+}
+
+/* Bugfix: 手機操作更穩，降低雙擊縮放與拖曳造成的誤觸感 */
+.arena,
+.target,
+.primary-btn,
+.secondary-btn,
+.icon-btn,
+.mode-btn,
+.tab {
+  touch-action: manipulation;
+}
+
+.target {
+  user-select: none;
+}

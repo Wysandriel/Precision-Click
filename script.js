@@ -10,6 +10,7 @@
     pauseScreen: $("#pauseScreen"),
     resultScreen: $("#resultScreen"),
     leaderboardScreen: $("#leaderboardScreen"),
+    rulesScreen: $("#rulesScreen"),
     floatingTextLayer: $("#floatingTextLayer"),
     particleLayer: $("#particleLayer"),
     toast: $("#toast"),
@@ -17,6 +18,9 @@
     soundToggle: $("#soundToggle"),
     leaderboardOpenTop: $("#leaderboardOpenTop"),
     leaderboardOpenMenu: $("#leaderboardOpenMenu"),
+    rulesOpenTop: $("#rulesOpenTop"),
+    rulesOpenMenu: $("#rulesOpenMenu"),
+    rulesClose: $("#rulesClose"),
     leaderboardClose: $("#leaderboardClose"),
     clearLeaderboard: $("#clearLeaderboard"),
 
@@ -94,6 +98,7 @@
   let filterMode = "all";
   let soundEnabled = localStorage.getItem(STORAGE.sound) !== "off";
   let audioCtx = null;
+  let previousOverlayScreen = null;
 
   const state = {
     running: false,
@@ -112,8 +117,13 @@
     tickTimer: null,
     targetTimer: null,
     achievements: new Set(),
-    player: "Player"
+    player: "Player",
+    inputLockedUntil: 0
   };
+
+  function onSafe(element, eventName, handler) {
+    if (element) element.addEventListener(eventName, handler);
+  }
 
   function init() {
     const savedName = localStorage.getItem(STORAGE.player);
@@ -135,24 +145,27 @@
       });
     });
 
-    els.startGame.addEventListener("click", startGame);
-    els.playAgain.addEventListener("click", startGame);
-    els.resumeGame.addEventListener("click", togglePause);
-    els.backToMenu.addEventListener("click", showMenu);
+    onSafe(els.startGame, "click", startGame);
+    onSafe(els.playAgain, "click", startGame);
+    onSafe(els.resumeGame, "click", togglePause);
+    onSafe(els.backToMenu, "click", showMenu);
 
-    els.soundToggle.addEventListener("click", () => {
+    onSafe(els.soundToggle, "click", () => {
       soundEnabled = !soundEnabled;
       localStorage.setItem(STORAGE.sound, soundEnabled ? "on" : "off");
       updateSoundButton();
       if (soundEnabled) playSound("start");
     });
 
-    els.leaderboardOpenTop.addEventListener("click", openLeaderboard);
-    els.leaderboardOpenMenu.addEventListener("click", openLeaderboard);
-    els.leaderboardClose.addEventListener("click", closeLeaderboard);
-    els.clearLeaderboard.addEventListener("click", clearLeaderboard);
+    onSafe(els.leaderboardOpenTop, "click", openLeaderboard);
+    onSafe(els.leaderboardOpenMenu, "click", openLeaderboard);
+    onSafe(els.leaderboardClose, "click", closeLeaderboard);
+    onSafe(els.rulesOpenTop, "click", openRules);
+    onSafe(els.rulesOpenMenu, "click", openRules);
+    onSafe(els.rulesClose, "click", closeRules);
+    onSafe(els.clearLeaderboard, "click", clearLeaderboard);
 
-    els.arena.addEventListener("click", handleArenaClick);
+    onSafe(els.arena, "click", handleArenaClick);
 
     document.addEventListener("keydown", (event) => {
       if (event.code === "Space" && state.running) {
@@ -161,6 +174,7 @@
       }
       if (event.key === "Escape") {
         if (isScreenActive(els.leaderboardScreen)) closeLeaderboard();
+        else if (isScreenActive(els.rulesScreen)) closeRules();
         else if (state.running) togglePause();
       }
     });
@@ -189,6 +203,7 @@
     state.misses = 0;
     state.reactions = [];
     state.achievements = new Set();
+    state.inputLockedUntil = performance.now() + 450;
     state.player = cleanName(els.playerName.value);
 
     els.playerName.value = state.player;
@@ -278,13 +293,14 @@
     state.paused = !state.paused;
 
     if (state.paused) {
+      clearTarget();
       showScreen(els.pauseScreen);
       playSound("pause");
     } else {
       showScreen(null);
-      state.targetBornAt = performance.now();
+      clearTarget();
       playSound("resume");
-      if (!state.currentTarget) spawnTarget();
+      spawnTarget();
     }
   }
 
@@ -481,6 +497,7 @@
 
   function handleArenaClick(event) {
     if (!state.running || state.paused || state.frozen) return;
+    if (performance.now() < state.inputLockedUntil) return;
     if (event.target.closest(".target")) return;
     if (event.target.closest(".screen")) return;
 
@@ -660,9 +677,33 @@
     }).join("");
   }
 
-  function openLeaderboard() {
+  function openRules() {
+    previousOverlayScreen = getActiveScreen();
+
     if (state.running) {
       state.paused = true;
+      clearTarget();
+    }
+
+    showScreen(els.rulesScreen);
+  }
+
+  function closeRules() {
+    if (state.running) {
+      showScreen(els.pauseScreen);
+    } else {
+      showScreen(previousOverlayScreen || els.menuScreen);
+    }
+
+    previousOverlayScreen = null;
+  }
+
+  function openLeaderboard() {
+    previousOverlayScreen = getActiveScreen();
+
+    if (state.running) {
+      state.paused = true;
+      clearTarget();
     }
 
     renderLeaderboard();
@@ -673,8 +714,10 @@
     if (state.running) {
       showScreen(els.pauseScreen);
     } else {
-      showScreen(els.menuScreen);
+      showScreen(previousOverlayScreen || els.menuScreen);
     }
+
+    previousOverlayScreen = null;
   }
 
   function clearLeaderboard() {
@@ -685,8 +728,14 @@
     toast("排行榜已清除");
   }
 
+  function getActiveScreen() {
+    return [els.menuScreen, els.pauseScreen, els.resultScreen, els.rulesScreen, els.leaderboardScreen]
+      .find((item) => item && item.classList.contains("active")) || null;
+  }
+
   function showScreen(screen) {
-    [els.menuScreen, els.pauseScreen, els.resultScreen, els.leaderboardScreen].forEach((item) => {
+    [els.menuScreen, els.pauseScreen, els.resultScreen, els.rulesScreen, els.leaderboardScreen].forEach((item) => {
+      if (!item) return;
       item.classList.toggle("active", item === screen);
     });
   }

@@ -22,6 +22,7 @@
 
       <div class="header-actions">
         <button id="soundToggle" class="icon-btn" type="button" aria-label="切換音效">音效 ON</button>
+        <button id="rulesOpenTop" class="icon-btn" type="button">遊戲規則</button>
         <button id="leaderboardOpenTop" class="icon-btn" type="button">排行榜</button>
       </div>
     </header>
@@ -114,7 +115,13 @@
 
             <div class="button-row">
               <button id="startGame" class="primary-btn" type="button">開始遊戲</button>
+              <button id="rulesOpenMenu" class="secondary-btn" type="button">遊戲規則</button>
               <button id="leaderboardOpenMenu" class="secondary-btn" type="button">查看排行榜</button>
+            </div>
+
+            <div class="quick-rules">
+              <strong>快速規則：</strong>
+              <span>點白色與金色目標得分，避開紅色、紫色、藍色陷阱。連擊越高，倍率越高。</span>
             </div>
           </div>
         </section>
@@ -156,6 +163,88 @@
           </div>
         </section>
 
+
+        <section id="rulesScreen" class="screen">
+          <div class="glass-card rules-card">
+            <div class="screen-head">
+              <div>
+                <p class="eyebrow">HOW TO PLAY</p>
+                <h2>遊戲規則</h2>
+              </div>
+              <button id="rulesClose" class="icon-btn" type="button">關閉</button>
+            </div>
+
+            <p class="desc">
+              Precision Click 的核心是「快、準、穩」。你要在時間結束前點擊正確目標、避開陷阱、累積連擊倍率，打出最高分與最高評級。
+            </p>
+
+            <div class="rules-grid">
+              <article>
+                <span class="rule-num">01</span>
+                <h3>基本玩法</h3>
+                <p>目標會隨機出現在場地中。點擊正確目標會得分；點錯空白處、漏點目標或點到陷阱都會受到懲罰。</p>
+              </article>
+
+              <article>
+                <span class="rule-num">02</span>
+                <h3>時間與生命</h3>
+                <p>每個模式都有不同時間與生命。生命歸零或時間結束時，遊戲立即結束並進入結算畫面。</p>
+              </article>
+
+              <article>
+                <span class="rule-num">03</span>
+                <h3>連擊倍率</h3>
+                <p>連續命中會增加連擊。每 5 連擊會提高倍率，分數會越來越高；任何失誤都會中斷連擊。</p>
+              </article>
+
+              <article>
+                <span class="rule-num">04</span>
+                <h3>評級系統</h3>
+                <p>評級不只看分數，也會看準確率、平均反應時間、最高連擊與失誤次數。最高評級是 SSS。</p>
+              </article>
+            </div>
+
+            <div class="target-rules">
+              <h3>目標與陷阱</h3>
+              <div class="target-rule-list">
+                <div><i class="dot normal"></i><strong>白色目標</strong><span>一般目標，點中即可得分。</span></div>
+                <div><i class="dot gold"></i><strong>金色目標</strong><span>獎勵目標，得分更高，並額外增加 2 秒。</span></div>
+                <div><i class="dot red"></i><strong>紅色炸彈</strong><span>危險陷阱，扣分、扣生命，並中斷連擊。</span></div>
+                <div><i class="dot purple"></i><strong>紫色假目標</strong><span>誘餌陷阱，扣分並中斷連擊，但不扣生命。</span></div>
+                <div><i class="dot cyan"></i><strong>藍色冰凍</strong><span>冰凍陷阱，扣分、扣生命、扣時間，並短暫鎖住操作。</span></div>
+              </div>
+            </div>
+
+            <div class="scoring-box">
+              <h3>計分重點</h3>
+              <ul>
+                <li>反應越快，單次命中分數越高。</li>
+                <li>連擊越高，倍率越高，後期分數會暴增。</li>
+                <li>點錯空白處會扣分並斷連擊。</li>
+                <li>漏掉白色或金色目標會扣分、扣生命並斷連擊。</li>
+                <li>想拿 S 以上，重點不是亂點快，而是保持高準確率與高連擊。</li>
+              </ul>
+            </div>
+
+            <div class="mode-rules">
+              <h3>模式說明</h3>
+              <div>
+                <strong>Classic</strong>
+                <span>30 秒標準挑戰，適合熟悉規則與練習穩定度。</span>
+              </div>
+              <div>
+                <strong>Rush</strong>
+                <span>45 秒高速模式，目標節奏更快，分數倍率較高。</span>
+              </div>
+              <div>
+                <strong>Survival</strong>
+                <span>60 秒生存模式，時間更長，考驗穩定輸出與失誤控制。</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
         <section id="leaderboardScreen" class="screen">
           <div class="glass-card leaderboard-card">
             <div class="screen-head">
@@ -167,7 +256,7 @@
             </div>
 
             <p class="desc">
-              目前使用瀏覽器本機儲存，適合直接部署到 GitHub Pages。若要所有玩家共用排行榜，需要另外接資料庫。
+              目前使用瀏覽器本機儲存；同一個玩家名稱只會保留最高成績。若要所有玩家共用排行榜，需要另外接資料庫。
             </p>
 
             <div class="tabs">
