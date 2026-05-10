@@ -8,13 +8,26 @@
 </head>
 <body>
   <main class="app">
-    <section class="hero">
+    <header class="hero">
       <p class="brand">WSR / NØDE:02</p>
       <h1>Precision Click</h1>
-      <p class="subtitle">在限定時間內點擊隨機出現的目標，測試你的反應速度、專注力與點擊準確度。</p>
-    </section>
+      <p class="subtitle">
+        點擊正確目標、避開陷阱、累積連擊倍率，在時間結束前打出最高精準分數。
+      </p>
+    </header>
 
     <section class="panel">
+      <div class="top-bar">
+        <div>
+          <p class="mode-label">目前模式</p>
+          <strong id="currentMode">尚未開始</strong>
+        </div>
+        <div class="top-actions">
+          <button id="soundBtn" class="ghost-btn" type="button">音效：開</button>
+          <button id="pauseBtn" class="ghost-btn" type="button" disabled>暫停</button>
+        </div>
+      </div>
+
       <div class="stats">
         <div class="stat-card">
           <span>分數</span>
@@ -29,43 +42,173 @@
           <strong id="streak">0</strong>
         </div>
         <div class="stat-card">
+          <span>倍率</span>
+          <strong id="multiplier">x1.0</strong>
+        </div>
+        <div class="stat-card">
+          <span>生命</span>
+          <strong id="lives">3</strong>
+        </div>
+        <div class="stat-card">
           <span>最高分</span>
           <strong id="bestScore">0</strong>
         </div>
       </div>
 
+      <div class="combo-meter" aria-label="連擊能量條">
+        <div id="comboFill"></div>
+      </div>
+
       <div id="gameBoard" class="game-board" aria-label="Precision Click 遊戲區域">
         <div id="startScreen" class="overlay">
-          <h2>準備好了嗎？</h2>
-          <p>點擊白色目標得分，點錯位置會扣分。目標越快點中，分數越高。</p>
-          <button id="startBtn" class="primary-btn">開始遊戲</button>
+          <div class="menu-card">
+            <p class="eyebrow">Reaction / Focus / Accuracy</p>
+            <h2>選擇模式</h2>
+            <p>
+              白色目標是一般分數，金色目標有高分與時間獎勵。紅色炸彈、紫色假目標、藍色冰凍陷阱都要避開。
+              連擊越高，倍率越高。
+            </p>
+
+            <label class="name-field">
+              <span>玩家名稱</span>
+              <input id="playerName" type="text" maxlength="14" placeholder="輸入你的名字" value="Player" />
+            </label>
+
+            <div class="mode-grid">
+              <button class="mode-card selected" data-mode="classic" type="button">
+                <strong>Classic</strong>
+                <span>30 秒，標準難度，適合練習。</span>
+              </button>
+              <button class="mode-card" data-mode="rush" type="button">
+                <strong>Rush</strong>
+                <span>45 秒，目標更快更小，分數更高。</span>
+              </button>
+              <button class="mode-card" data-mode="survival" type="button">
+                <strong>Survival</strong>
+                <span>60 秒，失誤更痛，考驗穩定度。</span>
+              </button>
+            </div>
+
+            <div class="menu-actions">
+              <button id="startBtn" class="primary-btn" type="button">開始遊戲</button>
+              <button id="openLeaderboardBtn" class="secondary-btn" type="button">查看排行榜</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="pauseScreen" class="overlay hidden">
+          <div class="menu-card">
+            <p class="eyebrow">Paused</p>
+            <h2>遊戲暫停</h2>
+            <p>按下繼續，或按鍵盤空白鍵繼續遊戲。</p>
+            <button id="resumeBtn" class="primary-btn" type="button">繼續</button>
+          </div>
         </div>
 
         <div id="endScreen" class="overlay hidden">
-          <h2>遊戲結束</h2>
-          <p id="resultText">你的分數是 0</p>
-          <button id="restartBtn" class="primary-btn">再玩一次</button>
+          <div class="menu-card">
+            <p class="eyebrow">Result</p>
+            <h2 id="rankTitle">遊戲結束</h2>
+            <p id="resultText">你的分數是 0</p>
+
+            <div class="rank-detail">
+              <div>
+                <span>評級分數</span>
+                <strong id="rankScore">0</strong>
+              </div>
+              <div>
+                <span>等級說明</span>
+                <strong id="rankComment">穩定發揮</strong>
+              </div>
+            </div>
+
+            <div class="result-grid">
+              <div>
+                <span>命中</span>
+                <strong id="finalHits">0</strong>
+              </div>
+              <div>
+                <span>失誤</span>
+                <strong id="finalMisses">0</strong>
+              </div>
+              <div>
+                <span>最高連擊</span>
+                <strong id="finalBestStreak">0</strong>
+              </div>
+              <div>
+                <span>平均反應</span>
+                <strong id="finalAvgReaction">0ms</strong>
+              </div>
+            </div>
+
+            <div class="leaderboard-mini">
+              <div class="section-head">
+                <h3>排行榜 Top 5</h3>
+                <button id="clearLeaderboardBtn" class="text-btn" type="button">清除紀錄</button>
+              </div>
+              <div id="leaderboardMiniList" class="leaderboard-list"></div>
+            </div>
+
+            <div class="menu-actions">
+              <button id="restartBtn" class="primary-btn" type="button">再玩一次</button>
+              <button id="backMenuBtn" class="secondary-btn" type="button">回主選單</button>
+            </div>
+          </div>
         </div>
 
-        <button id="target" class="target hidden" aria-label="點擊目標"></button>
+        <div id="leaderboardScreen" class="overlay hidden">
+          <div class="menu-card leaderboard-card">
+            <p class="eyebrow">Local Ranking</p>
+            <h2>本機排行榜</h2>
+            <p>這個排行榜會儲存在目前瀏覽器中，適合 GitHub Pages 靜態網站使用。</p>
+
+            <div class="leaderboard-tabs">
+              <button class="tab-btn selected" data-filter="all" type="button">全部</button>
+              <button class="tab-btn" data-filter="classic" type="button">Classic</button>
+              <button class="tab-btn" data-filter="rush" type="button">Rush</button>
+              <button class="tab-btn" data-filter="survival" type="button">Survival</button>
+            </div>
+
+            <div id="leaderboardFullList" class="leaderboard-list full"></div>
+
+            <div class="menu-actions">
+              <button id="closeLeaderboardBtn" class="primary-btn" type="button">返回</button>
+              <button id="clearLeaderboardBtn2" class="secondary-btn danger-btn" type="button">清除排行榜</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="toast" class="toast hidden">Achievement</div>
       </div>
 
       <div class="info-row">
         <p>命中：<strong id="hits">0</strong></p>
         <p>失誤：<strong id="misses">0</strong></p>
         <p>平均反應：<strong id="avgReaction">0ms</strong></p>
+        <p>最高連擊：<strong id="bestStreak">0</strong></p>
       </div>
     </section>
 
     <section class="how-to-play">
-      <h2>遊戲規則</h2>
-      <ul>
-        <li>限時 30 秒。</li>
-        <li>點擊白色目標可以得分。</li>
-        <li>反應越快，速度加成越高。</li>
-        <li>連續命中會增加連擊加成。</li>
-        <li>點錯位置會扣分並中斷連擊。</li>
-      </ul>
+      <h2>評級系統</h2>
+      <div class="rules-grid">
+        <article>
+          <h3>SSS / SS / S</h3>
+          <p>高分、高準確率、快速反應、穩定連擊，屬於頂級表現。</p>
+        </article>
+        <article>
+          <h3>A+ / A / A-</h3>
+          <p>反應與穩定度都不錯，已經能掌握節奏。</p>
+        </article>
+        <article>
+          <h3>B+ / B / B-</h3>
+          <p>基礎表現穩定，但失誤或反應速度還有進步空間。</p>
+        </article>
+        <article>
+          <h3>C / D / E</h3>
+          <p>適合先練準確率，少點錯比盲目追求速度更重要。</p>
+        </article>
+      </div>
     </section>
   </main>
 
