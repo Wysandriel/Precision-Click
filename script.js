@@ -9,20 +9,15 @@
     menuScreen: $("#menuScreen"),
     pauseScreen: $("#pauseScreen"),
     resultScreen: $("#resultScreen"),
-    leaderboardScreen: $("#leaderboardScreen"),
     rulesScreen: $("#rulesScreen"),
     floatingTextLayer: $("#floatingTextLayer"),
     particleLayer: $("#particleLayer"),
     toast: $("#toast"),
 
     soundToggle: $("#soundToggle"),
-    leaderboardOpenTop: $("#leaderboardOpenTop"),
-    leaderboardOpenMenu: $("#leaderboardOpenMenu"),
     rulesOpenTop: $("#rulesOpenTop"),
     rulesOpenMenu: $("#rulesOpenMenu"),
     rulesClose: $("#rulesClose"),
-    leaderboardClose: $("#leaderboardClose"),
-    clearLeaderboard: $("#clearLeaderboard"),
 
     playerName: $("#playerName"),
     playerDisplay: $("#playerDisplay"),
@@ -50,13 +45,10 @@
     finalHits: $("#finalHits"),
     finalMisses: $("#finalMisses"),
     finalBestCombo: $("#finalBestCombo"),
-    finalReaction: $("#finalReaction"),
-
-    leaderboardList: $("#leaderboardList")
+    finalReaction: $("#finalReaction")
   };
 
   const STORAGE = {
-    leaderboard: "precision-click-pro-leaderboard",
     player: "precision-click-pro-player",
     sound: "precision-click-pro-sound"
   };
@@ -95,7 +87,6 @@
   };
 
   let selectedMode = "classic";
-  let filterMode = "all";
   let soundEnabled = localStorage.getItem(STORAGE.sound) !== "off";
   let audioCtx = null;
   let previousOverlayScreen = null;
@@ -131,18 +122,9 @@
 
     updateSoundButton();
     updateHud();
-    renderLeaderboard();
 
     $$(".mode-btn").forEach((button) => {
       button.addEventListener("click", () => selectMode(button.dataset.mode));
-    });
-
-    $$(".tab").forEach((button) => {
-      button.addEventListener("click", () => {
-        filterMode = button.dataset.filter;
-        $$(".tab").forEach((tab) => tab.classList.toggle("selected", tab === button));
-        renderLeaderboard();
-      });
     });
 
     onSafe(els.startGame, "click", startGame);
@@ -157,24 +139,23 @@
       if (soundEnabled) playSound("start");
     });
 
-    onSafe(els.leaderboardOpenTop, "click", openLeaderboard);
-    onSafe(els.leaderboardOpenMenu, "click", openLeaderboard);
-    onSafe(els.leaderboardClose, "click", closeLeaderboard);
     onSafe(els.rulesOpenTop, "click", openRules);
     onSafe(els.rulesOpenMenu, "click", openRules);
     onSafe(els.rulesClose, "click", closeRules);
-    onSafe(els.clearLeaderboard, "click", clearLeaderboard);
-
     onSafe(els.arena, "click", handleArenaClick);
+
+    [els.menuScreen, els.pauseScreen, els.resultScreen, els.rulesScreen].forEach((screen) => {
+      onSafe(screen, "click", (event) => event.stopPropagation());
+    });
 
     document.addEventListener("keydown", (event) => {
       if (event.code === "Space" && state.running) {
         event.preventDefault();
         togglePause();
       }
+
       if (event.key === "Escape") {
-        if (isScreenActive(els.leaderboardScreen)) closeLeaderboard();
-        else if (isScreenActive(els.rulesScreen)) closeRules();
+        if (isScreenActive(els.rulesScreen)) closeRules();
         else if (state.running) togglePause();
       }
     });
@@ -243,22 +224,6 @@
     const stats = getStats();
     const rank = getRank(stats);
 
-    saveLeaderboard({
-      name: state.player,
-      mode: selectedMode,
-      modeLabel: modes[selectedMode].label,
-      score: state.score,
-      rank: rank.rank,
-      rankClass: rank.className,
-      rankScore: rank.score,
-      accuracy: stats.accuracy,
-      avgReaction: stats.avgReaction,
-      hits: state.hits,
-      misses: state.misses,
-      bestCombo: state.bestCombo,
-      date: new Date().toLocaleDateString("zh-TW")
-    });
-
     els.resultTitle.textContent = "任務結算";
     els.resultSummary.textContent = `分數 ${state.score}｜準確率 ${stats.accuracy}%｜模式 ${modes[selectedMode].label}`;
     els.rankBadge.textContent = rank.rank;
@@ -270,7 +235,6 @@
     els.finalBestCombo.textContent = state.bestCombo;
     els.finalReaction.textContent = `${stats.avgReaction}ms`;
 
-    renderLeaderboard();
     showScreen(els.resultScreen);
     playSound("gameover");
     updateHud();
@@ -626,57 +590,6 @@
     });
   }
 
-  function saveLeaderboard(entry) {
-    const list = getLeaderboard();
-    list.push(entry);
-    list.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      if (b.rankScore !== a.rankScore) return b.rankScore - a.rankScore;
-      return a.avgReaction - b.avgReaction;
-    });
-
-    localStorage.setItem(STORAGE.leaderboard, JSON.stringify(list.slice(0, 50)));
-  }
-
-  function getLeaderboard() {
-    try {
-      const data = JSON.parse(localStorage.getItem(STORAGE.leaderboard) || "[]");
-      return Array.isArray(data) ? data : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function renderLeaderboard() {
-    let list = getLeaderboard();
-    if (filterMode !== "all") {
-      list = list.filter((item) => item.mode === filterMode);
-    }
-
-    list = list.slice(0, 10);
-
-    if (!list.length) {
-      els.leaderboardList.innerHTML = `<div class="empty">目前還沒有紀錄。先玩一場，建立第一筆成績。</div>`;
-      return;
-    }
-
-    els.leaderboardList.innerHTML = list.map((item, index) => {
-      const topClass = index < 3 ? `top-${index + 1}` : "";
-      return `
-        <div class="leader-row ${topClass}">
-          <div class="place">#${index + 1}</div>
-          <div>
-            <div class="leader-name">${escapeHtml(item.name)}</div>
-            <div class="leader-sub">${escapeHtml(item.modeLabel)}｜${escapeHtml(item.date)}</div>
-          </div>
-          <span class="rank-badge ${item.rankClass}">${escapeHtml(item.rank)}</span>
-          <div class="leader-score">${item.score}</div>
-          <div class="leader-sub hide-mobile">${item.accuracy}%｜${item.avgReaction}ms｜${item.bestCombo}連擊</div>
-        </div>
-      `;
-    }).join("");
-  }
-
   function openRules() {
     previousOverlayScreen = getActiveScreen();
 
@@ -698,50 +611,20 @@
     previousOverlayScreen = null;
   }
 
-  function openLeaderboard() {
-    previousOverlayScreen = getActiveScreen();
-
-    if (state.running) {
-      state.paused = true;
-      clearTarget();
-    }
-
-    renderLeaderboard();
-    showScreen(els.leaderboardScreen);
-  }
-
-  function closeLeaderboard() {
-    if (state.running) {
-      showScreen(els.pauseScreen);
-    } else {
-      showScreen(previousOverlayScreen || els.menuScreen);
-    }
-
-    previousOverlayScreen = null;
-  }
-
-  function clearLeaderboard() {
-    const ok = window.confirm("確定要清除本機排行榜嗎？");
-    if (!ok) return;
-    localStorage.removeItem(STORAGE.leaderboard);
-    renderLeaderboard();
-    toast("排行榜已清除");
-  }
-
   function getActiveScreen() {
-    return [els.menuScreen, els.pauseScreen, els.resultScreen, els.rulesScreen, els.leaderboardScreen]
+    return [els.menuScreen, els.pauseScreen, els.resultScreen, els.rulesScreen]
       .find((item) => item && item.classList.contains("active")) || null;
   }
 
   function showScreen(screen) {
-    [els.menuScreen, els.pauseScreen, els.resultScreen, els.rulesScreen, els.leaderboardScreen].forEach((item) => {
+    [els.menuScreen, els.pauseScreen, els.resultScreen, els.rulesScreen].forEach((item) => {
       if (!item) return;
       item.classList.toggle("active", item === screen);
     });
   }
 
   function isScreenActive(screen) {
-    return screen.classList.contains("active");
+    return screen && screen.classList.contains("active");
   }
 
   function flash(type, shake = false) {
@@ -854,16 +737,6 @@
   function cleanName(value) {
     const cleaned = String(value || "Player").trim().replace(/[<>]/g, "");
     return cleaned ? cleaned.slice(0, 14) : "Player";
-  }
-
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, (char) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-    }[char]));
   }
 
   function random(min, max) {

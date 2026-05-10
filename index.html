@@ -23,7 +23,6 @@
       <div class="header-actions">
         <button id="soundToggle" class="icon-btn" type="button" aria-label="切換音效">音效 ON</button>
         <button id="rulesOpenTop" class="icon-btn" type="button">遊戲規則</button>
-        <button id="leaderboardOpenTop" class="icon-btn" type="button">排行榜</button>
       </div>
     </header>
 
@@ -116,7 +115,6 @@
             <div class="button-row">
               <button id="startGame" class="primary-btn" type="button">開始遊戲</button>
               <button id="rulesOpenMenu" class="secondary-btn" type="button">遊戲規則</button>
-              <button id="leaderboardOpenMenu" class="secondary-btn" type="button">查看排行榜</button>
             </div>
 
             <div class="quick-rules">
@@ -244,33 +242,6 @@
           </div>
         </section>
 
-
-        <section id="leaderboardScreen" class="screen">
-          <div class="glass-card leaderboard-card">
-            <div class="screen-head">
-              <div>
-                <p class="eyebrow">LOCAL RANKING</p>
-                <h2>排行榜</h2>
-              </div>
-              <button id="leaderboardClose" class="icon-btn" type="button">關閉</button>
-            </div>
-
-            <p class="desc">
-              目前使用瀏覽器本機儲存；同一個玩家名稱只會保留最高成績。若要所有玩家共用排行榜，需要另外接資料庫。
-            </p>
-
-            <div class="tabs">
-              <button class="tab selected" data-filter="all" type="button">全部</button>
-              <button class="tab" data-filter="classic" type="button">Classic</button>
-              <button class="tab" data-filter="rush" type="button">Rush</button>
-              <button class="tab" data-filter="survival" type="button">Survival</button>
-            </div>
-
-            <div id="leaderboardList" class="leaderboard-list"></div>
-
-            <button id="clearLeaderboard" class="danger-text" type="button">清除本機排行榜</button>
-          </div>
-        </section>
 
         <div id="toast" class="toast" aria-live="polite"></div>
       </section>

@@ -369,9 +369,6 @@ h1 {
   width: min(740px, 100%);
 }
 
-.leaderboard-card {
-  width: min(900px, 100%);
-}
 
 .eyebrow {
   margin: 0 0 10px;
@@ -742,70 +739,15 @@ h1 {
   background: rgba(255, 209, 102, 0.08);
 }
 
-.leaderboard-list {
-  display: grid;
-  gap: 9px;
-  max-height: 340px;
-  overflow: auto;
-  padding-right: 4px;
-}
 
-.leader-row {
-  display: grid;
-  grid-template-columns: 46px 1.2fr 76px 92px 1fr;
-  gap: 10px;
-  align-items: center;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
-}
 
-.leader-row.top-1 {
-  border-color: rgba(255, 209, 102, 0.45);
-  background: rgba(255, 209, 102, 0.08);
-}
 
-.leader-row.top-2,
-.leader-row.top-3 {
-  background: rgba(255, 255, 255, 0.075);
-}
 
-.place {
-  color: var(--gold);
-  font-weight: 1000;
-}
 
-.leader-name {
-  font-weight: 900;
-}
 
-.leader-sub {
-  color: var(--muted);
-  font-size: 0.78rem;
-  margin-top: 4px;
-}
 
-.leader-score {
-  font-size: 1.08rem;
-  font-weight: 1000;
-}
 
-.empty {
-  padding: 22px;
-  color: var(--muted);
-  border: 1px dashed var(--line);
-  border-radius: 20px;
-  text-align: center;
-}
 
-.danger-text {
-  margin-top: 16px;
-  border: 0;
-  color: #fca5a5;
-  background: transparent;
-  cursor: pointer;
-}
 
 @media (max-width: 1040px) {
   .arena-frame {
