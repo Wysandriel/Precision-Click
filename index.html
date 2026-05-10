@@ -3,212 +3,188 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Precision Click｜精準點擊</title>
+  <meta name="theme-color" content="#050711" />
+  <title>Precision Click｜Neon Arena</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="app">
-    <header class="hero">
-      <p class="brand">WSR / NØDE:02</p>
-      <h1>Precision Click</h1>
-      <p class="subtitle">
-        點擊正確目標、避開陷阱、累積連擊倍率，在時間結束前打出最高精準分數。
-      </p>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+  <div class="noise"></div>
+
+  <main class="shell">
+    <header class="game-header">
+      <div>
+        <p class="brand">WSR / NØDE:02</p>
+        <h1>Precision Click</h1>
+        <p class="tagline">Neon Arena Edition</p>
+      </div>
+
+      <div class="header-actions">
+        <button id="soundToggle" class="icon-btn" type="button" aria-label="切換音效">音效 ON</button>
+        <button id="leaderboardOpenTop" class="icon-btn" type="button">排行榜</button>
+      </div>
     </header>
 
-    <section class="panel">
-      <div class="top-bar">
-        <div>
-          <p class="mode-label">目前模式</p>
-          <strong id="currentMode">尚未開始</strong>
+    <section class="arena-frame">
+      <aside class="side-panel">
+        <div class="status-card player-card">
+          <span class="label">PLAYER</span>
+          <strong id="playerDisplay">PLAYER</strong>
+          <small id="modeDisplay">尚未開始</small>
         </div>
-        <div class="top-actions">
-          <button id="soundBtn" class="ghost-btn" type="button">音效：開</button>
-          <button id="pauseBtn" class="ghost-btn" type="button" disabled>暫停</button>
-        </div>
-      </div>
 
-      <div class="stats">
-        <div class="stat-card">
-          <span>分數</span>
-          <strong id="score">0</strong>
+        <div class="stat-grid">
+          <div class="stat">
+            <span>分數</span>
+            <strong id="score">0</strong>
+          </div>
+          <div class="stat">
+            <span>時間</span>
+            <strong><span id="time">30</span>s</strong>
+          </div>
+          <div class="stat">
+            <span>生命</span>
+            <strong id="lives">♥♥♥</strong>
+          </div>
+          <div class="stat">
+            <span>連擊</span>
+            <strong id="combo">0</strong>
+          </div>
+          <div class="stat">
+            <span>倍率</span>
+            <strong id="multiplier">x1.00</strong>
+          </div>
+          <div class="stat">
+            <span>準確率</span>
+            <strong id="accuracy">100%</strong>
+          </div>
         </div>
-        <div class="stat-card">
-          <span>時間</span>
-          <strong><span id="time">30</span>s</strong>
-        </div>
-        <div class="stat-card">
-          <span>連擊</span>
-          <strong id="streak">0</strong>
-        </div>
-        <div class="stat-card">
-          <span>倍率</span>
-          <strong id="multiplier">x1.0</strong>
-        </div>
-        <div class="stat-card">
-          <span>生命</span>
-          <strong id="lives">3</strong>
-        </div>
-        <div class="stat-card">
-          <span>最高分</span>
-          <strong id="bestScore">0</strong>
-        </div>
-      </div>
 
-      <div class="combo-meter" aria-label="連擊能量條">
-        <div id="comboFill"></div>
-      </div>
+        <div class="meter-block">
+          <div class="meter-head">
+            <span>COMBO ENERGY</span>
+            <strong id="energyText">0%</strong>
+          </div>
+          <div class="meter"><div id="energyFill"></div></div>
+        </div>
 
-      <div id="gameBoard" class="game-board" aria-label="Precision Click 遊戲區域">
-        <div id="startScreen" class="overlay">
-          <div class="menu-card">
-            <p class="eyebrow">Reaction / Focus / Accuracy</p>
-            <h2>選擇模式</h2>
-            <p>
-              白色目標是一般分數，金色目標有高分與時間獎勵。紅色炸彈、紫色假目標、藍色冰凍陷阱都要避開。
-              連擊越高，倍率越高。
+        <div class="legend">
+          <h2>目標說明</h2>
+          <div><i class="dot normal"></i><span>白色：一般目標</span></div>
+          <div><i class="dot gold"></i><span>金色：獎勵 +2 秒</span></div>
+          <div><i class="dot red"></i><span>紅色：炸彈陷阱</span></div>
+          <div><i class="dot purple"></i><span>紫色：假目標陷阱</span></div>
+          <div><i class="dot cyan"></i><span>藍色：冰凍陷阱</span></div>
+        </div>
+      </aside>
+
+      <section id="arena" class="arena" aria-label="遊戲區域">
+        <div class="scan-line"></div>
+        <div id="floatingTextLayer" class="floating-layer"></div>
+        <div id="particleLayer" class="particle-layer"></div>
+
+        <section id="menuScreen" class="screen active">
+          <div class="glass-card menu-card">
+            <p class="eyebrow">REACTION / FOCUS / CONTROL</p>
+            <h2>進入精準訓練場</h2>
+            <p class="desc">
+              點擊正確目標、避開陷阱、維持連擊倍率。你的速度、準確率、失誤次數與連擊都會影響最終評級。
             </p>
 
-            <label class="name-field">
+            <label class="input-label">
               <span>玩家名稱</span>
-              <input id="playerName" type="text" maxlength="14" placeholder="輸入你的名字" value="Player" />
+              <input id="playerName" type="text" maxlength="14" value="Player" autocomplete="off" />
             </label>
 
-            <div class="mode-grid">
-              <button class="mode-card selected" data-mode="classic" type="button">
+            <div class="mode-select" role="group" aria-label="模式選擇">
+              <button class="mode-btn selected" data-mode="classic" type="button">
                 <strong>Classic</strong>
-                <span>30 秒，標準難度，適合練習。</span>
+                <span>30 秒標準挑戰</span>
               </button>
-              <button class="mode-card" data-mode="rush" type="button">
+              <button class="mode-btn" data-mode="rush" type="button">
                 <strong>Rush</strong>
-                <span>45 秒，目標更快更小，分數更高。</span>
+                <span>45 秒高速節奏</span>
               </button>
-              <button class="mode-card" data-mode="survival" type="button">
+              <button class="mode-btn" data-mode="survival" type="button">
                 <strong>Survival</strong>
-                <span>60 秒，失誤更痛，考驗穩定度。</span>
+                <span>60 秒穩定生存</span>
               </button>
             </div>
 
-            <div class="menu-actions">
-              <button id="startBtn" class="primary-btn" type="button">開始遊戲</button>
-              <button id="openLeaderboardBtn" class="secondary-btn" type="button">查看排行榜</button>
+            <div class="button-row">
+              <button id="startGame" class="primary-btn" type="button">開始遊戲</button>
+              <button id="leaderboardOpenMenu" class="secondary-btn" type="button">查看排行榜</button>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div id="pauseScreen" class="overlay hidden">
-          <div class="menu-card">
-            <p class="eyebrow">Paused</p>
-            <h2>遊戲暫停</h2>
-            <p>按下繼續，或按鍵盤空白鍵繼續遊戲。</p>
-            <button id="resumeBtn" class="primary-btn" type="button">繼續</button>
+        <section id="pauseScreen" class="screen">
+          <div class="glass-card compact-card">
+            <p class="eyebrow">PAUSED</p>
+            <h2>已暫停</h2>
+            <p class="desc">按空白鍵或下方按鈕繼續。</p>
+            <button id="resumeGame" class="primary-btn" type="button">繼續遊戲</button>
           </div>
-        </div>
+        </section>
 
-        <div id="endScreen" class="overlay hidden">
-          <div class="menu-card">
-            <p class="eyebrow">Result</p>
-            <h2 id="rankTitle">遊戲結束</h2>
-            <p id="resultText">你的分數是 0</p>
+        <section id="resultScreen" class="screen">
+          <div class="glass-card result-card">
+            <p class="eyebrow">RESULT</p>
+            <h2 id="resultTitle">遊戲結束</h2>
+            <p id="resultSummary" class="desc">你的結果會顯示在這裡。</p>
 
-            <div class="rank-detail">
+            <div class="rank-panel">
+              <span id="rankBadge" class="rank-badge rank-c">C</span>
               <div>
-                <span>評級分數</span>
-                <strong id="rankScore">0</strong>
-              </div>
-              <div>
-                <span>等級說明</span>
-                <strong id="rankComment">穩定發揮</strong>
+                <strong id="rankScore">0 / 100</strong>
+                <p id="rankComment">繼續練習。</p>
               </div>
             </div>
 
-            <div class="result-grid">
-              <div>
-                <span>命中</span>
-                <strong id="finalHits">0</strong>
-              </div>
-              <div>
-                <span>失誤</span>
-                <strong id="finalMisses">0</strong>
-              </div>
-              <div>
-                <span>最高連擊</span>
-                <strong id="finalBestStreak">0</strong>
-              </div>
-              <div>
-                <span>平均反應</span>
-                <strong id="finalAvgReaction">0ms</strong>
-              </div>
+            <div class="result-stats">
+              <div><span>命中</span><strong id="finalHits">0</strong></div>
+              <div><span>失誤</span><strong id="finalMisses">0</strong></div>
+              <div><span>最高連擊</span><strong id="finalBestCombo">0</strong></div>
+              <div><span>平均反應</span><strong id="finalReaction">0ms</strong></div>
             </div>
 
-            <div class="leaderboard-mini">
-              <div class="section-head">
-                <h3>排行榜 Top 5</h3>
-                <button id="clearLeaderboardBtn" class="text-btn" type="button">清除紀錄</button>
-              </div>
-              <div id="leaderboardMiniList" class="leaderboard-list"></div>
-            </div>
-
-            <div class="menu-actions">
-              <button id="restartBtn" class="primary-btn" type="button">再玩一次</button>
-              <button id="backMenuBtn" class="secondary-btn" type="button">回主選單</button>
+            <div class="button-row">
+              <button id="playAgain" class="primary-btn" type="button">再玩一次</button>
+              <button id="backToMenu" class="secondary-btn" type="button">回主選單</button>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div id="leaderboardScreen" class="overlay hidden">
-          <div class="menu-card leaderboard-card">
-            <p class="eyebrow">Local Ranking</p>
-            <h2>本機排行榜</h2>
-            <p>這個排行榜會儲存在目前瀏覽器中，適合 GitHub Pages 靜態網站使用。</p>
-
-            <div class="leaderboard-tabs">
-              <button class="tab-btn selected" data-filter="all" type="button">全部</button>
-              <button class="tab-btn" data-filter="classic" type="button">Classic</button>
-              <button class="tab-btn" data-filter="rush" type="button">Rush</button>
-              <button class="tab-btn" data-filter="survival" type="button">Survival</button>
+        <section id="leaderboardScreen" class="screen">
+          <div class="glass-card leaderboard-card">
+            <div class="screen-head">
+              <div>
+                <p class="eyebrow">LOCAL RANKING</p>
+                <h2>排行榜</h2>
+              </div>
+              <button id="leaderboardClose" class="icon-btn" type="button">關閉</button>
             </div>
 
-            <div id="leaderboardFullList" class="leaderboard-list full"></div>
+            <p class="desc">
+              目前使用瀏覽器本機儲存，適合直接部署到 GitHub Pages。若要所有玩家共用排行榜，需要另外接資料庫。
+            </p>
 
-            <div class="menu-actions">
-              <button id="closeLeaderboardBtn" class="primary-btn" type="button">返回</button>
-              <button id="clearLeaderboardBtn2" class="secondary-btn danger-btn" type="button">清除排行榜</button>
+            <div class="tabs">
+              <button class="tab selected" data-filter="all" type="button">全部</button>
+              <button class="tab" data-filter="classic" type="button">Classic</button>
+              <button class="tab" data-filter="rush" type="button">Rush</button>
+              <button class="tab" data-filter="survival" type="button">Survival</button>
             </div>
+
+            <div id="leaderboardList" class="leaderboard-list"></div>
+
+            <button id="clearLeaderboard" class="danger-text" type="button">清除本機排行榜</button>
           </div>
-        </div>
+        </section>
 
-        <div id="toast" class="toast hidden">Achievement</div>
-      </div>
-
-      <div class="info-row">
-        <p>命中：<strong id="hits">0</strong></p>
-        <p>失誤：<strong id="misses">0</strong></p>
-        <p>平均反應：<strong id="avgReaction">0ms</strong></p>
-        <p>最高連擊：<strong id="bestStreak">0</strong></p>
-      </div>
-    </section>
-
-    <section class="how-to-play">
-      <h2>評級系統</h2>
-      <div class="rules-grid">
-        <article>
-          <h3>SSS / SS / S</h3>
-          <p>高分、高準確率、快速反應、穩定連擊，屬於頂級表現。</p>
-        </article>
-        <article>
-          <h3>A+ / A / A-</h3>
-          <p>反應與穩定度都不錯，已經能掌握節奏。</p>
-        </article>
-        <article>
-          <h3>B+ / B / B-</h3>
-          <p>基礎表現穩定，但失誤或反應速度還有進步空間。</p>
-        </article>
-        <article>
-          <h3>C / D / E</h3>
-          <p>適合先練準確率，少點錯比盲目追求速度更重要。</p>
-        </article>
-      </div>
+        <div id="toast" class="toast" aria-live="polite"></div>
+      </section>
     </section>
   </main>
 
