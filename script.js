@@ -19,7 +19,6 @@
     rulesOpenMenu: $("#rulesOpenMenu"),
     rulesClose: $("#rulesClose"),
 
-    playerName: $("#playerName"),
     playerDisplay: $("#playerDisplay"),
     modeDisplay: $("#modeDisplay"),
 
@@ -49,7 +48,6 @@
   };
 
   const STORAGE = {
-    player: "precision-click-pro-player",
     sound: "precision-click-pro-sound"
   };
 
@@ -117,8 +115,6 @@
   }
 
   function init() {
-    const savedName = localStorage.getItem(STORAGE.player);
-    if (savedName) els.playerName.value = savedName;
 
     updateSoundButton();
     updateHud();
@@ -185,10 +181,8 @@
     state.reactions = [];
     state.achievements = new Set();
     state.inputLockedUntil = performance.now() + 450;
-    state.player = cleanName(els.playerName.value);
+    state.player = "ACTIVE";
 
-    els.playerName.value = state.player;
-    localStorage.setItem(STORAGE.player, state.player);
     els.playerDisplay.textContent = state.player;
     els.modeDisplay.textContent = `${mode.label} / ${mode.description}`;
 
@@ -246,6 +240,7 @@
     state.frozen = false;
     clearTimers();
     clearTarget();
+    els.playerDisplay.textContent = "READY";
     els.modeDisplay.textContent = "尚未開始";
     els.arena.classList.remove("frozen");
     showScreen(els.menuScreen);
@@ -733,12 +728,6 @@
     osc.start(start);
     osc.stop(start + duration + 0.03);
   }
-
-  function cleanName(value) {
-    const cleaned = String(value || "Player").trim().replace(/[<>]/g, "");
-    return cleaned ? cleaned.slice(0, 14) : "Player";
-  }
-
   function random(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }

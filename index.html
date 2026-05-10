@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#050711" />
-  <title>PULSE</title>
+  <title>Reaction Arena</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -13,16 +13,24 @@
   <div class="noise"></div>
 
   <main class="shell">
-    <header class="game-header minimal-header">
-      <button id="soundToggle" class="icon-btn" type="button" aria-label="切換音效">音效 ON</button>
-      <button id="rulesOpenTop" class="icon-btn" type="button">規則</button>
+    <header class="game-header">
+      <div>
+        <p class="brand">REACTION / FOCUS / CONTROL</p>
+        <h1>Reaction Arena</h1>
+        <p class="tagline">精準反應訓練場</p>
+      </div>
+
+      <div class="header-actions">
+        <button id="soundToggle" class="icon-btn" type="button" aria-label="切換音效">音效 ON</button>
+        <button id="rulesOpenTop" class="icon-btn" type="button">遊戲規則</button>
+      </div>
     </header>
 
     <section class="arena-frame">
       <aside class="side-panel">
         <div class="status-card player-card">
-          <span class="label">PLAYER</span>
-          <strong id="playerDisplay">PLAYER</strong>
+          <span class="label">STATUS</span>
+          <strong id="playerDisplay">READY</strong>
           <small id="modeDisplay">尚未開始</small>
         </div>
 
@@ -77,36 +85,31 @@
         <div id="particleLayer" class="particle-layer"></div>
 
         <section id="menuScreen" class="screen active">
-          <div class="glass-card menu-card">
-            <p class="eyebrow">REACTION GAME</p>
-            <h2 class="game-logo">PULSE</h2>
+          <div class="glass-card menu-card refined-menu">
+            <p class="eyebrow">START SESSION</p>
+            <h2>選擇挑戰模式</h2>
             <p class="desc">
-              看準、點擊、避開陷阱。用最穩的節奏打出最高評級。
+              不需要輸入名稱。選擇模式後直接開始，點擊正確目標、避開陷阱、維持連擊倍率。
             </p>
-
-            <label class="input-label">
-              <span>玩家名稱</span>
-              <input id="playerName" type="text" maxlength="14" value="Player" autocomplete="off" />
-            </label>
 
             <div class="mode-select" role="group" aria-label="模式選擇">
               <button class="mode-btn selected" data-mode="classic" type="button">
                 <strong>Classic</strong>
-                <span>30 秒標準挑戰</span>
+                <span>30 秒標準挑戰，適合熟悉節奏與規則。</span>
               </button>
               <button class="mode-btn" data-mode="rush" type="button">
                 <strong>Rush</strong>
-                <span>45 秒高速節奏</span>
+                <span>45 秒高速節奏，目標更快，分數倍率更高。</span>
               </button>
               <button class="mode-btn" data-mode="survival" type="button">
                 <strong>Survival</strong>
-                <span>60 秒穩定生存</span>
+                <span>60 秒穩定生存，考驗專注力與失誤控制。</span>
               </button>
             </div>
 
             <div class="button-row">
               <button id="startGame" class="primary-btn" type="button">開始遊戲</button>
-              <button id="rulesOpenMenu" class="secondary-btn" type="button">遊戲規則</button>
+              <button id="rulesOpenMenu" class="secondary-btn" type="button">查看規則</button>
             </div>
 
             <div class="quick-rules">
@@ -153,7 +156,6 @@
           </div>
         </section>
 
-
         <section id="rulesScreen" class="screen">
           <div class="glass-card rules-card">
             <div class="screen-head">
@@ -165,7 +167,7 @@
             </div>
 
             <p class="desc">
-              PULSE 的核心是「快、準、穩」。你要在時間結束前點擊正確目標、避開陷阱、累積連擊倍率，打出最高分與最高評級。
+              核心是「快、準、穩」。你要在時間結束前點擊正確目標、避開陷阱、累積連擊倍率，打出最高分與最高評級。
             </p>
 
             <div class="rules-grid">
@@ -215,25 +217,8 @@
                 <li>想拿 S 以上，重點不是亂點快，而是保持高準確率與高連擊。</li>
               </ul>
             </div>
-
-            <div class="mode-rules">
-              <h3>模式說明</h3>
-              <div>
-                <strong>Classic</strong>
-                <span>30 秒標準挑戰，適合熟悉規則與練習穩定度。</span>
-              </div>
-              <div>
-                <strong>Rush</strong>
-                <span>45 秒高速模式，目標節奏更快，分數倍率較高。</span>
-              </div>
-              <div>
-                <strong>Survival</strong>
-                <span>60 秒生存模式，時間更長，考驗穩定輸出與失誤控制。</span>
-              </div>
-            </div>
           </div>
         </section>
-
 
         <div id="toast" class="toast" aria-live="polite"></div>
       </section>
