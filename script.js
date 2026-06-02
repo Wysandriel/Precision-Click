@@ -22,7 +22,6 @@
     settingsOpen: $("#settingsOpen"),
     settingsClose: $("#settingsClose"),
     settingsDone: $("#settingsDone"),
-    rulesOpenTop: $("#rulesOpenTop"),
     rulesOpenMenu: $("#rulesOpenMenu"),
     rulesClose: $("#rulesClose"),
 
@@ -71,7 +70,12 @@
     finalFever: $("#finalFever"),
     finalModeBest: $("#finalModeBest"),
     finalGlobalBest: $("#finalGlobalBest"),
-    finalMissStreak: $("#finalMissStreak")
+    finalMissStreak: $("#finalMissStreak"),
+
+    summaryMode: $("#summaryMode"),
+    summaryDifficulty: $("#summaryDifficulty"),
+    summaryTime: $("#summaryTime"),
+    summaryLives: $("#summaryLives")
   };
 
   const STORAGE = {
@@ -221,6 +225,8 @@
     updateRecordsUI();
     selectMode(selectedMode);
     selectDifficulty(selectedDifficulty);
+    updateSessionSummary();
+    updateControlState();
 
     $$(".mode-btn").forEach((button) => {
       button.addEventListener("click", () => selectMode(button.dataset.mode));
@@ -242,7 +248,6 @@
     onSafe(els.settingsOpen, "click", openSettings);
     onSafe(els.settingsClose, "click", closeSettings);
     onSafe(els.settingsDone, "click", closeSettings);
-    onSafe(els.rulesOpenTop, "click", openRules);
     onSafe(els.rulesOpenMenu, "click", openRules);
     onSafe(els.rulesClose, "click", closeRules);
     onSafe(els.resetRecords, "click", resetAllRecords);
@@ -343,6 +348,7 @@
     $$(".mode-btn").forEach((button) => {
       button.classList.toggle("selected", button.dataset.mode === selectedMode);
     });
+    updateSessionSummary();
     updateHud();
   }
 
@@ -351,6 +357,7 @@
     $$(".difficulty-btn").forEach((button) => {
       button.classList.toggle("selected", button.dataset.difficulty === selectedDifficulty);
     });
+    updateSessionSummary();
     updateHud();
   }
 
@@ -395,7 +402,9 @@
 
     playSound("start");
     vibrate(18);
+    updateSessionSummary();
     updateHud();
+    updateControlState();
     spawnTarget();
   }
 
@@ -461,6 +470,7 @@
     vibrate([18, 38, 18]);
     updateHud();
     updateRecordsUI();
+    updateControlState();
   }
 
   function updateScoresAndRecords(stats) {
@@ -498,7 +508,9 @@
     els.modeDisplay.textContent = "尚未開始";
     els.arena.classList.remove("frozen");
     showScreen(els.menuScreen);
+    updateSessionSummary();
     updateHud();
+    updateControlState();
   }
 
   function togglePause() {
@@ -513,6 +525,7 @@
     clearTarget();
     showScreen(els.pauseScreen);
     playSound("pause");
+    updateControlState();
   }
 
   function resumeGame() {
@@ -522,6 +535,7 @@
     showScreen(null);
     clearTarget();
     playSound("resume");
+    updateControlState();
     spawnTarget();
   }
 
@@ -853,6 +867,24 @@
     });
   }
 
+  function updateSessionSummary() {
+    const mode = modes[selectedMode];
+    const difficulty = difficulties[selectedDifficulty];
+    const startLives = Math.max(1, mode.lives + difficulty.livesBonus);
+
+    if (els.summaryMode) els.summaryMode.textContent = mode.label;
+    if (els.summaryDifficulty) els.summaryDifficulty.textContent = difficulty.label;
+    if (els.summaryTime) els.summaryTime.textContent = `${mode.totalTime} 秒`;
+    if (els.summaryLives) els.summaryLives.textContent = `${startLives} ♥`;
+  }
+
+  function updateControlState() {
+    if (els.pauseTop) {
+      els.pauseTop.disabled = !state.running;
+      els.pauseTop.textContent = state.paused ? "繼續" : "暫停";
+    }
+  }
+
   function updateHud() {
     const stats = getStats();
     const progressToFever = state.fever ? 100 : clamp(((state.combo % FEVER_COMBO_STEP) / FEVER_COMBO_STEP) * 100, 0, 100);
@@ -873,6 +905,7 @@
     els.energyFill.style.width = `${progressToFever}%`;
     els.energyText.textContent = state.fever ? "FEVER" : `${Math.round(progressToFever)}%`;
     els.difficultyDisplay.textContent = difficulties[selectedDifficulty].label;
+    updateControlState();
   }
 
   function updateRecordsUI() {

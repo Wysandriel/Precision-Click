@@ -25,7 +25,6 @@
         <button id="fullscreenBtn" class="icon-btn" type="button" aria-label="切換全螢幕">全螢幕</button>
         <button id="soundToggle" class="icon-btn" type="button" aria-label="切換音效">音效 ON</button>
         <button id="settingsOpen" class="icon-btn" type="button">設定</button>
-        <button id="rulesOpenTop" class="icon-btn" type="button">規則</button>
       </div>
     </header>
 
@@ -56,28 +55,22 @@
           <div class="meter"><div id="energyFill"></div></div>
         </div>
 
-        <section class="record-card" aria-label="遊玩紀錄">
-          <div class="card-head">
-            <h2>遊玩紀錄</h2>
-            <p>自動記錄你的整體表現。</p>
-          </div>
+        <div class="record-card">
+          <h2>遊玩紀錄</h2>
           <div><span>總場次</span><strong id="recordPlays">0</strong></div>
           <div><span>歷史最高</span><strong id="recordGlobalBest">0</strong></div>
           <div><span>最長連擊</span><strong id="recordBestCombo">0</strong></div>
           <div><span>平均準確</span><strong id="recordAvgAccuracy">100%</strong></div>
-        </section>
+        </div>
 
-        <section class="legend" aria-label="目標說明">
-          <div class="card-head">
-            <h2>目標說明</h2>
-            <p>開局前先辨識每種目標顏色。</p>
-          </div>
-          <div><i class="dot normal"></i><span>白色：一般目標</span></div>
-          <div><i class="dot gold"></i><span>金色：獎勵 +2 秒</span></div>
-          <div><i class="dot red"></i><span>紅色：炸彈陷阱</span></div>
-          <div><i class="dot purple"></i><span>紫色：假目標陷阱</span></div>
-          <div><i class="dot cyan"></i><span>藍色：冰凍陷阱</span></div>
-        </section>
+        <div class="session-card">
+          <h2>本局摘要</h2>
+          <div><span>模式</span><strong id="summaryMode">Classic</strong></div>
+          <div><span>難度</span><strong id="summaryDifficulty">Normal</strong></div>
+          <div><span>時間限制</span><strong id="summaryTime">30 秒</strong></div>
+          <div><span>起始生命</span><strong id="summaryLives">3</strong></div>
+          <div><span>Fever 觸發</span><strong>20 Combo</strong></div>
+        </div>
       </aside>
 
       <section id="arena" class="arena" aria-label="遊戲區域">
@@ -123,10 +116,7 @@
               <button id="rulesOpenMenu" class="secondary-btn" type="button">查看規則</button>
             </div>
 
-            <div class="quick-rules">
-              <strong>快速規則：</strong>
-              <span>白色與金色可以點；紅色、紫色、藍色不要點。Combo 滿 20 會啟動 Fever Mode，短時間分數加成。</span>
-            </div>
+
           </div>
         </section>
 

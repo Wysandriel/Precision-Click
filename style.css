@@ -191,6 +191,12 @@ h1 {
   box-shadow: 0 18px 42px rgba(255, 255, 255, 0.16);
 }
 
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 button:focus-visible,
 select:focus-visible,
 input:focus-visible,
@@ -220,8 +226,8 @@ input:focus-visible,
 .side-panel {
   padding: 14px;
   display: grid;
-  grid-auto-rows: min-content;
-  gap: 12px;
+  grid-template-rows: auto auto auto auto minmax(0, auto);
+  gap: 10px;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
@@ -230,14 +236,12 @@ input:focus-visible,
 
 .status-card,
 .stat,
-.legend,
 .meter-block,
-.record-card {
-  position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.035));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+.record-card,
+.session-card {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.045);
 }
 
 .player-card {
@@ -276,30 +280,27 @@ input:focus-visible,
 }
 
 .stat {
-  padding: 12px;
-  min-height: 76px;
+  padding: 11px;
 }
 
 .stat strong {
   display: block;
-  margin-top: 7px;
+  margin-top: 6px;
   font-size: 1.24rem;
-  line-height: 1.05;
-  word-break: break-word;
+  line-height: 1;
 }
 
 .meter-block,
 .record-card,
-.legend {
-  padding: 14px;
+.session-card {
+  padding: 12px;
 }
 
 .meter-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 9px;
 }
 
 .meter-head strong {
@@ -321,80 +322,35 @@ input:focus-visible,
   transition: width 0.16s ease;
 }
 
-.card-head {
-  margin-bottom: 12px;
-}
-
-.card-head h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  min-height: 24px;
-  font-size: 0.98rem;
-  line-height: 1.28;
-  letter-spacing: 0.02em;
-}
-
-.card-head h2::before {
-  content: "";
-  flex: 0 0 3px;
-  width: 3px;
-  height: 18px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--gold), rgba(255, 209, 102, 0.28));
-  box-shadow: 0 0 16px rgba(255, 209, 102, 0.24);
-}
-
-.card-head p {
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.45;
+.record-card h2,
+.session-card h2 {
+  margin: 0 0 9px;
+  font-size: 0.95rem;
 }
 
 .record-card div {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   gap: 12px;
-  margin: 0;
-  padding: 9px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.028);
-}
-
-.record-card div + div {
-  margin-top: 8px;
+  margin: 6px 0;
 }
 
 .record-card strong {
-  font-size: 0.98rem;
+  font-size: 0.95rem;
 }
 
-.legend > div:not(.card-head) {
+.session-card div {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  padding: 9px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.028);
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0;
   color: var(--muted);
-  font-size: 0.88rem;
-  line-height: 1.45;
+  font-size: 0.9rem;
 }
 
-.legend > div:not(.card-head) + div:not(.card-head) {
-  margin-top: 8px;
-}
-
-.legend > div:not(.card-head) span {
-  display: block;
-  flex: 1;
-  min-width: 0;
+.session-card strong {
+  color: var(--text);
+  font-size: 0.96rem;
 }
 
 .dot {
@@ -567,17 +523,6 @@ input:focus-visible,
   color: var(--gold);
 }
 
-.quick-rules {
-  margin-top: 16px;
-  padding: 12px 14px;
-  border: 1px solid rgba(255, 209, 102, 0.22);
-  border-radius: 18px;
-  color: var(--muted);
-  background: rgba(255, 209, 102, 0.055);
-  line-height: 1.55;
-}
-
-.quick-rules strong,
 .high-score-message {
   color: var(--gold);
   font-weight: 900;
@@ -1094,7 +1039,7 @@ body.anim-low .particle {
   .player-card,
   .meter-block,
   .record-card,
-  .legend {
+  .session-card {
     display: none;
   }
 
@@ -1217,7 +1162,7 @@ body.anim-low .particle {
     gap: 8px;
   }
 
-  .legend,
+  .session-card,
   .record-card {
     display: none;
   }
@@ -1295,27 +1240,5 @@ body.anim-low .particle {
 @media (max-width: 560px) {
   .rules-content {
     grid-template-columns: 1fr;
-  }
-}
-
-/* polish fixes */
-.legend,
-.record-card {
-  overflow: hidden;
-}
-
-.legend .dot {
-  margin-left: 1px;
-}
-
-@media (max-width: 1120px) {
-  .card-head p {
-    font-size: 0.75rem;
-  }
-}
-
-@media (max-width: 820px), (max-height: 760px) {
-  .card-head p {
-    display: none;
   }
 }
