@@ -237,8 +237,7 @@ input:focus-visible,
 .status-card,
 .stat,
 .meter-block,
-.record-card,
-.session-card {
+.record-card {
   border: 1px solid var(--line);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.045);
@@ -291,8 +290,7 @@ input:focus-visible,
 }
 
 .meter-block,
-.record-card,
-.session-card {
+.record-card {
   padding: 12px;
 }
 
@@ -322,8 +320,7 @@ input:focus-visible,
   transition: width 0.16s ease;
 }
 
-.record-card h2,
-.session-card h2 {
+.record-card h2 h2 {
   margin: 0;
   font-size: 1.02rem;
   font-weight: 900;
@@ -1079,8 +1076,7 @@ body.anim-low .particle {
 
   .player-card,
   .meter-block,
-  .record-card,
-  .session-card {
+  .record-card {
     display: none;
   }
 
@@ -1285,13 +1281,3 @@ body.anim-low .particle {
 }
 
 
-@media (max-width: 1120px) {
-  .session-row {
-    min-height: 36px;
-  }
-
-  .session-row span,
-  .session-row strong {
-    font-size: 0.9rem;
-  }
-}
