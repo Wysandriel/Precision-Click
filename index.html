@@ -34,10 +34,14 @@
           <small id="modeDisplay">尚未開始</small>
         </div>
 
-        <div class="stat-grid">
+        <div class="stat-grid" aria-live="polite">
           <div class="stat">
             <span>分數</span>
             <strong id="score">0</strong>
+          </div>
+          <div class="stat">
+            <span>最高分</span>
+            <strong id="bestScore">0</strong>
           </div>
           <div class="stat">
             <span>時間</span>
@@ -133,6 +137,7 @@
             <p class="eyebrow">RESULT</p>
             <h2 id="resultTitle">遊戲結束</h2>
             <p id="resultSummary" class="desc">你的結果會顯示在這裡。</p>
+            <p id="highScoreMessage" class="desc high-score-message">最高分紀錄會顯示在這裡。</p>
 
             <div class="rank-panel">
               <span id="rankBadge" class="rank-badge rank-c">C</span>

@@ -28,6 +28,7 @@
     backToMenu: $("#backToMenu"),
 
     score: $("#score"),
+    bestScore: $("#bestScore"),
     time: $("#time"),
     lives: $("#lives"),
     combo: $("#combo"),
@@ -38,6 +39,7 @@
 
     resultTitle: $("#resultTitle"),
     resultSummary: $("#resultSummary"),
+    highScoreMessage: $("#highScoreMessage"),
     rankBadge: $("#rankBadge"),
     rankScore: $("#rankScore"),
     rankComment: $("#rankComment"),
@@ -48,7 +50,8 @@
   };
 
   const STORAGE = {
-    sound: "precision-click-pro-sound"
+    sound: "precision-click-pro-sound",
+    highScore: "precision-click-pro-high-score"
   };
 
   const modes = {
@@ -88,6 +91,14 @@
   let soundEnabled = localStorage.getItem(STORAGE.sound) !== "off";
   let audioCtx = null;
   let previousOverlayScreen = null;
+  let savedHighScore = getStoredHighScore();
+
+  const EFFECT_POOL_SIZE = 96;
+  const FLOAT_POOL_SIZE = 18;
+  const effectPools = {
+    particles: [],
+    floats: []
+  };
 
   const state = {
     running: false,
@@ -103,7 +114,8 @@
     reactions: [],
     currentTarget: null,
     targetBornAt: 0,
-    tickTimer: null,
+    animationFrame: null,
+    lastFrameAt: 0,
     targetTimer: null,
     achievements: new Set(),
     player: "Player",
@@ -116,6 +128,7 @@
 
   function init() {
 
+    setupEffectPools();
     updateSoundButton();
     updateHud();
 
@@ -192,17 +205,34 @@
     els.arena.classList.remove("frozen");
     showScreen(null);
 
-    state.tickTimer = window.setInterval(() => {
-      if (!state.running || state.paused || state.frozen) return;
-      state.timeLeft -= 1;
-      updateHud();
-
-      if (state.timeLeft <= 0) endGame();
-    }, 1000);
+    state.lastFrameAt = performance.now();
+    state.animationFrame = window.requestAnimationFrame(gameLoop);
 
     playSound("start");
     updateHud();
     spawnTarget();
+  }
+
+  function gameLoop(timestamp) {
+    if (!state.running) return;
+
+    if (!state.lastFrameAt) {
+      state.lastFrameAt = timestamp;
+    }
+
+    const deltaSeconds = Math.min(0.08, (timestamp - state.lastFrameAt) / 1000);
+    state.lastFrameAt = timestamp;
+
+    if (!state.paused && !state.frozen) {
+      state.timeLeft = Math.max(0, state.timeLeft - deltaSeconds);
+      if (state.timeLeft <= 0) {
+        endGame();
+        return;
+      }
+    }
+
+    updateHud();
+    state.animationFrame = window.requestAnimationFrame(gameLoop);
   }
 
   function endGame() {
@@ -217,6 +247,7 @@
 
     const stats = getStats();
     const rank = getRank(stats);
+    const isNewHighScore = updateHighScore();
 
     els.resultTitle.textContent = "任務結算";
     els.resultSummary.textContent = `分數 ${state.score}｜準確率 ${stats.accuracy}%｜模式 ${modes[selectedMode].label}`;
@@ -228,6 +259,11 @@
     els.finalMisses.textContent = state.misses;
     els.finalBestCombo.textContent = state.bestCombo;
     els.finalReaction.textContent = `${stats.avgReaction}ms`;
+    if (els.highScoreMessage) {
+      els.highScoreMessage.textContent = isNewHighScore
+        ? `新紀錄！目前最高分：${savedHighScore}`
+        : `目前最高分：${savedHighScore}`;
+    }
 
     showScreen(els.resultScreen);
     playSound("gameover");
@@ -256,6 +292,7 @@
       showScreen(els.pauseScreen);
       playSound("pause");
     } else {
+      state.lastFrameAt = performance.now();
       showScreen(null);
       clearTarget();
       playSound("resume");
@@ -480,6 +517,7 @@
 
     window.setTimeout(() => {
       state.frozen = false;
+      state.lastFrameAt = performance.now();
       els.arena.classList.remove("frozen");
       if (state.running && !state.paused) spawnTarget();
     }, 1200);
@@ -497,23 +535,37 @@
   }
 
   function clearTimers() {
-    window.clearInterval(state.tickTimer);
+    if (state.animationFrame) {
+      window.cancelAnimationFrame(state.animationFrame);
+    }
+
     window.clearTimeout(state.targetTimer);
-    state.tickTimer = null;
+    state.animationFrame = null;
+    state.lastFrameAt = 0;
     state.targetTimer = null;
   }
 
   function clearEffects() {
-    els.floatingTextLayer.innerHTML = "";
-    els.particleLayer.innerHTML = "";
+    [...effectPools.particles, ...effectPools.floats].forEach((node) => {
+      node.className = node.classList.contains("particle")
+        ? "particle pooled-hidden"
+        : "float-text pooled-hidden";
+    });
   }
 
   function updateHud() {
     const stats = getStats();
     const energy = Math.min(100, (state.combo % 20) * 5);
 
-    els.score.textContent = String(state.score);
-    els.time.textContent = String(Math.max(0, state.timeLeft));
+    if (els.score.textContent !== String(state.score)) {
+      els.score.textContent = String(state.score);
+      els.score.classList.remove("score-pop");
+      void els.score.offsetWidth;
+      els.score.classList.add("score-pop");
+    }
+
+    if (els.bestScore) els.bestScore.textContent = String(savedHighScore);
+    els.time.textContent = String(Math.ceil(Math.max(0, state.timeLeft)));
     els.lives.textContent = state.lives > 0 ? "♥".repeat(state.lives) : "0";
     els.combo.textContent = String(state.combo);
     els.multiplier.textContent = `x${getMultiplier().toFixed(2)}`;
@@ -633,14 +685,57 @@
     }, 240);
   }
 
+  function setupEffectPools() {
+    if (!els.particleLayer || !els.floatingTextLayer) return;
+
+    for (let i = 0; i < EFFECT_POOL_SIZE; i += 1) {
+      const particle = document.createElement("span");
+      particle.className = "particle pooled-hidden";
+      els.particleLayer.appendChild(particle);
+      effectPools.particles.push(particle);
+    }
+
+    for (let i = 0; i < FLOAT_POOL_SIZE; i += 1) {
+      const text = document.createElement("div");
+      text.className = "float-text pooled-hidden";
+      els.floatingTextLayer.appendChild(text);
+      effectPools.floats.push(text);
+    }
+  }
+
+  function getAvailableNode(pool, fallbackFactory) {
+    const node = pool.find((item) => item.classList.contains("pooled-hidden"));
+
+    if (node) return node;
+
+    const fallback = fallbackFactory();
+    pool.push(fallback);
+    return fallback;
+  }
+
+  function replayAnimation(node) {
+    node.style.animation = "none";
+    void node.offsetWidth;
+    node.style.animation = "";
+  }
+
   function floatText(text, x, y, type) {
-    const node = document.createElement("div");
+    const node = getAvailableNode(effectPools.floats, () => {
+      const created = document.createElement("div");
+      els.floatingTextLayer.appendChild(created);
+      return created;
+    });
+
     node.className = `float-text ${type}`;
     node.textContent = text;
     node.style.left = `${x}px`;
     node.style.top = `${y}px`;
-    els.floatingTextLayer.appendChild(node);
-    window.setTimeout(() => node.remove(), 820);
+    replayAnimation(node);
+
+    window.setTimeout(() => {
+      node.className = "float-text pooled-hidden";
+      node.textContent = "";
+    }, 820);
   }
 
   function burst(x, y, type) {
@@ -652,7 +747,12 @@
     }[type] || "var(--green)";
 
     for (let i = 0; i < 14; i += 1) {
-      const particle = document.createElement("span");
+      const particle = getAvailableNode(effectPools.particles, () => {
+        const created = document.createElement("span");
+        els.particleLayer.appendChild(created);
+        return created;
+      });
+
       particle.className = "particle";
       particle.style.left = `${x}px`;
       particle.style.top = `${y}px`;
@@ -662,9 +762,11 @@
       const distance = random(36, 92);
       particle.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
       particle.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
+      replayAnimation(particle);
 
-      els.particleLayer.appendChild(particle);
-      window.setTimeout(() => particle.remove(), 700);
+      window.setTimeout(() => {
+        particle.className = "particle pooled-hidden";
+      }, 700);
     }
   }
 
@@ -728,6 +830,19 @@
     osc.start(start);
     osc.stop(start + duration + 0.03);
   }
+  function getStoredHighScore() {
+    const value = Number(localStorage.getItem(STORAGE.highScore));
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  }
+
+  function updateHighScore() {
+    if (state.score <= savedHighScore) return false;
+
+    savedHighScore = state.score;
+    localStorage.setItem(STORAGE.highScore, String(savedHighScore));
+    return true;
+  }
+
   function random(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }

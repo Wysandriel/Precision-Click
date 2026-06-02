@@ -1105,3 +1105,64 @@ h1 {
     text-align: left;
   }
 }
+
+/* Optimization: stronger mobile control, visible keyboard focus, and pooled effects */
+html {
+  overscroll-behavior: none;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button:focus-visible,
+.target:focus-visible {
+  outline: 3px solid rgba(255, 209, 102, 0.9);
+  outline-offset: 4px;
+}
+
+.arena {
+  touch-action: none;
+  contain: layout paint style;
+}
+
+.target {
+  will-change: transform, opacity;
+}
+
+.float-text,
+.particle {
+  will-change: transform, opacity;
+}
+
+.pooled-hidden {
+  display: none !important;
+}
+
+.high-score-message {
+  margin-top: 6px;
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.stat strong.score-pop {
+  animation: scorePop 0.22s ease;
+}
+
+@keyframes scorePop {
+  0% { transform: scale(1); }
+  55% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
