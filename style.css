@@ -101,6 +101,7 @@ button {
 .shell {
   width: min(1440px, calc(100vw - 28px));
   height: 100dvh;
+  overflow: hidden;
   margin: 0 auto;
   padding: 16px 0;
   display: grid;
@@ -221,7 +222,10 @@ input:focus-visible,
   display: grid;
   grid-template-rows: auto auto auto auto minmax(0, auto);
   gap: 10px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .status-card,
@@ -404,7 +408,10 @@ input:focus-visible,
 .glass-card {
   width: min(780px, 100%);
   max-height: calc(100dvh - 145px);
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: clamp(18px, 3vw, 30px);
   border: 1px solid var(--line-bright);
   border-radius: 30px;
@@ -901,6 +908,72 @@ body.anim-low .particle {
   100% { transform: scale(1); }
 }
 
+
+
+/* Fixed outer layout + inner panel scrolling
+   - The whole page never moves, so no right-side browser scrollbar.
+   - Long content inside rules/settings/result/menu/side panel can scroll inside its own card. */
+.shell,
+.arena-frame,
+.arena,
+.screen {
+  min-height: 0;
+}
+
+.side-panel,
+.glass-card,
+.rules-content,
+.settings-grid,
+.result-card {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 209, 102, 0.42) rgba(255, 255, 255, 0.045);
+}
+
+.side-panel::-webkit-scrollbar,
+.glass-card::-webkit-scrollbar,
+.rules-content::-webkit-scrollbar,
+.settings-grid::-webkit-scrollbar,
+.result-card::-webkit-scrollbar {
+  width: 8px;
+}
+
+.side-panel::-webkit-scrollbar-track,
+.glass-card::-webkit-scrollbar-track,
+.rules-content::-webkit-scrollbar-track,
+.settings-grid::-webkit-scrollbar-track,
+.result-card::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.045);
+  border-radius: 999px;
+}
+
+.side-panel::-webkit-scrollbar-thumb,
+.glass-card::-webkit-scrollbar-thumb,
+.rules-content::-webkit-scrollbar-thumb,
+.settings-grid::-webkit-scrollbar-thumb,
+.result-card::-webkit-scrollbar-thumb {
+  background: rgba(255, 209, 102, 0.42);
+  border-radius: 999px;
+}
+
+.side-panel::-webkit-scrollbar-thumb:hover,
+.glass-card::-webkit-scrollbar-thumb:hover,
+.rules-content::-webkit-scrollbar-thumb:hover,
+.settings-grid::-webkit-scrollbar-thumb:hover,
+.result-card::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 209, 102, 0.68);
+}
+
+.screen.active {
+  overflow: hidden;
+}
+
+.rules-card,
+.settings-card,
+.result-card,
+.refined-menu {
+  overscroll-behavior: contain;
+}
+
 @media (max-width: 1120px) {
   .arena-frame {
     grid-template-columns: 275px minmax(0, 1fr);
@@ -943,7 +1016,19 @@ body.anim-low .particle {
 
   .arena-frame {
     grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+    overflow: hidden;
   }
+
+  .side-panel {
+    max-height: 28dvh;
+    overflow-y: auto;
+  }
+
+  .arena {
+    min-height: 0;
+  }
+
 
   .side-panel {
     order: 2;
@@ -1108,15 +1193,17 @@ body.anim-low .particle {
   }
 }
 
-/* Final no-scroll tuning: rules are arranged in two compact columns so the page never needs a right scrollbar. */
-.rules-content {
-  grid-template-columns: 1fr 1fr;
-  align-items: start;
-}
+/* Rules content can scroll inside the card; desktop uses two columns, mobile returns to one column. */
+@media (min-width: 821px) {
+  .rules-content {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
 
-.rules-content > .desc,
-.rules-content > .rules-grid {
-  grid-column: 1 / -1;
+  .rules-content > .desc,
+  .rules-content > .rules-grid {
+    grid-column: 1 / -1;
+  }
 }
 
 .rules-content .target-rules {
