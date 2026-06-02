@@ -56,22 +56,28 @@
           <div class="meter"><div id="energyFill"></div></div>
         </div>
 
-        <div class="record-card">
-          <h2>遊玩紀錄</h2>
+        <section class="record-card" aria-label="遊玩紀錄">
+          <div class="card-head">
+            <h2>遊玩紀錄</h2>
+            <p>自動記錄你的整體表現。</p>
+          </div>
           <div><span>總場次</span><strong id="recordPlays">0</strong></div>
           <div><span>歷史最高</span><strong id="recordGlobalBest">0</strong></div>
           <div><span>最長連擊</span><strong id="recordBestCombo">0</strong></div>
           <div><span>平均準確</span><strong id="recordAvgAccuracy">100%</strong></div>
-        </div>
+        </section>
 
-        <div class="legend">
-          <h2>目標說明</h2>
+        <section class="legend" aria-label="目標說明">
+          <div class="card-head">
+            <h2>目標說明</h2>
+            <p>開局前先辨識每種目標顏色。</p>
+          </div>
           <div><i class="dot normal"></i><span>白色：一般目標</span></div>
           <div><i class="dot gold"></i><span>金色：獎勵 +2 秒</span></div>
           <div><i class="dot red"></i><span>紅色：炸彈陷阱</span></div>
           <div><i class="dot purple"></i><span>紫色：假目標陷阱</span></div>
           <div><i class="dot cyan"></i><span>藍色：冰凍陷阱</span></div>
-        </div>
+        </section>
       </aside>
 
       <section id="arena" class="arena" aria-label="遊戲區域">
