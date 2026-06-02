@@ -2,37 +2,40 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0f17" />
-  <meta name="description" content="Precision Click - 極簡精準反應訓練遊戲" />
-  <title>Precision Click｜Minimal Focus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#050711" />
+  <title>Reaction Arena</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="app-shell">
-    <header class="game-header" aria-label="遊戲標題與操作">
-      <div class="title-block">
-        <p class="brand">PRECISION CLICK</p>
-        <h1>Minimal Focus</h1>
-        <p class="tagline">簡約、清楚、專注的反應訓練場</p>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+  <div class="noise"></div>
+
+  <main class="shell">
+    <header class="game-header">
+      <div>
+        <p class="brand">REACTION / FOCUS / CONTROL</p>
+        <h1>Reaction Arena</h1>
+        <p class="tagline">精準反應訓練場</p>
       </div>
 
       <div class="header-actions">
         <button id="soundToggle" class="icon-btn" type="button" aria-label="切換音效">音效 ON</button>
-        <button id="rulesOpenTop" class="icon-btn" type="button">規則</button>
+        <button id="rulesOpenTop" class="icon-btn" type="button">遊戲規則</button>
       </div>
     </header>
 
     <section class="arena-frame">
-      <aside class="side-panel" aria-label="遊戲狀態面板">
+      <aside class="side-panel">
         <div class="status-card player-card">
-          <span class="label">狀態</span>
+          <span class="label">STATUS</span>
           <strong id="playerDisplay">READY</strong>
           <small id="modeDisplay">尚未開始</small>
         </div>
 
         <div class="stat-grid" aria-live="polite">
-          <div class="stat primary-stat">
+          <div class="stat">
             <span>分數</span>
             <strong id="score">0</strong>
           </div>
@@ -56,7 +59,7 @@
             <span>倍率</span>
             <strong id="multiplier">x1.00</strong>
           </div>
-          <div class="stat wide-stat">
+          <div class="stat">
             <span>準確率</span>
             <strong id="accuracy">100%</strong>
           </div>
@@ -64,52 +67,47 @@
 
         <div class="meter-block">
           <div class="meter-head">
-            <span>連擊能量</span>
+            <span>COMBO ENERGY</span>
             <strong id="energyText">0%</strong>
           </div>
-          <div class="meter" aria-hidden="true"><div id="energyFill"></div></div>
+          <div class="meter"><div id="energyFill"></div></div>
         </div>
 
         <div class="legend">
           <h2>目標說明</h2>
-          <div><i class="dot normal"></i><span>白色：命中得分</span></div>
-          <div><i class="dot gold"></i><span>金色：高分與 +2 秒</span></div>
-          <div><i class="dot red"></i><span>紅色：扣分扣生命</span></div>
-          <div><i class="dot purple"></i><span>紫色：扣分斷連擊</span></div>
-          <div><i class="dot cyan"></i><span>藍色：冰凍與扣時間</span></div>
-        </div>
-
-        <div class="project-meta">
-          <span>吳昇融</span>
-          <span>U114B207</span>
+          <div><i class="dot normal"></i><span>白色：一般目標</span></div>
+          <div><i class="dot gold"></i><span>金色：獎勵 +2 秒</span></div>
+          <div><i class="dot red"></i><span>紅色：炸彈陷阱</span></div>
+          <div><i class="dot purple"></i><span>紫色：假目標陷阱</span></div>
+          <div><i class="dot cyan"></i><span>藍色：冰凍陷阱</span></div>
         </div>
       </aside>
 
       <section id="arena" class="arena" aria-label="遊戲區域">
-        <div class="arena-watermark">FOCUS</div>
-        <div id="floatingTextLayer" class="floating-layer" aria-hidden="true"></div>
-        <div id="particleLayer" class="particle-layer" aria-hidden="true"></div>
+        <div class="scan-line"></div>
+        <div id="floatingTextLayer" class="floating-layer"></div>
+        <div id="particleLayer" class="particle-layer"></div>
 
-        <section id="menuScreen" class="screen active" aria-label="主選單">
+        <section id="menuScreen" class="screen active">
           <div class="glass-card menu-card refined-menu">
-            <p class="eyebrow">START</p>
-            <h2>選擇練習模式</h2>
+            <p class="eyebrow">START SESSION</p>
+            <h2>選擇挑戰模式</h2>
             <p class="desc">
-              介面重新設計為低干擾風格：資訊集中、按鈕清楚、遊戲區域更乾淨，讓玩家專注在目標判斷與反應速度。
+              選擇模式後直接開始，點擊正確目標、避開陷阱、維持連擊倍率。
             </p>
 
             <div class="mode-select" role="group" aria-label="模式選擇">
               <button class="mode-btn selected" data-mode="classic" type="button">
                 <strong>Classic</strong>
-                <span>30 秒標準挑戰，最適合熟悉節奏。</span>
+                <span>30 秒標準挑戰，適合熟悉節奏與規則。</span>
               </button>
               <button class="mode-btn" data-mode="rush" type="button">
                 <strong>Rush</strong>
-                <span>45 秒高速挑戰，目標壽命更短。</span>
+                <span>45 秒高速節奏，目標更快，分數倍率更高。</span>
               </button>
               <button class="mode-btn" data-mode="survival" type="button">
                 <strong>Survival</strong>
-                <span>60 秒生存挑戰，重點是穩定少失誤。</span>
+                <span>60 秒穩定生存，考驗專注力與失誤控制。</span>
               </button>
             </div>
 
@@ -119,13 +117,13 @@
             </div>
 
             <div class="quick-rules">
-              <strong>快速規則</strong>
-              <span>點白色與金色目標；避開紅色、紫色、藍色陷阱。連擊越高，倍率越高。</span>
+              <strong>快速規則：</strong>
+              <span>點白色與金色目標得分，避開紅色、紫色、藍色陷阱。連擊越高，倍率越高。</span>
             </div>
           </div>
         </section>
 
-        <section id="pauseScreen" class="screen" aria-label="暫停畫面">
+        <section id="pauseScreen" class="screen">
           <div class="glass-card compact-card">
             <p class="eyebrow">PAUSED</p>
             <h2>已暫停</h2>
@@ -134,7 +132,7 @@
           </div>
         </section>
 
-        <section id="resultScreen" class="screen" aria-label="結算畫面">
+        <section id="resultScreen" class="screen">
           <div class="glass-card result-card">
             <p class="eyebrow">RESULT</p>
             <h2 id="resultTitle">遊戲結束</h2>
@@ -163,7 +161,7 @@
           </div>
         </section>
 
-        <section id="rulesScreen" class="screen" aria-label="遊戲規則">
+        <section id="rulesScreen" class="screen">
           <div class="glass-card rules-card">
             <div class="screen-head">
               <div>
@@ -174,29 +172,32 @@
             </div>
 
             <p class="desc">
-              這是一款精準反應遊戲。目標不是亂點，而是在有限時間內判斷正確目標、避開陷阱並維持連擊。
+              核心是「快、準、穩」。你要在時間結束前點擊正確目標、避開陷阱、累積連擊倍率，打出最高分與最高評級。
             </p>
 
             <div class="rules-grid">
               <article>
                 <span class="rule-num">01</span>
                 <h3>基本玩法</h3>
-                <p>目標會隨機出現。點中正確目標得分；點空白、漏點或點到陷阱會受到懲罰。</p>
+                <p>目標會隨機出現在場地中。點擊正確目標會得分；點錯空白處、漏點目標或點到陷阱都會受到懲罰。</p>
               </article>
+
               <article>
                 <span class="rule-num">02</span>
                 <h3>時間與生命</h3>
-                <p>每個模式時間與生命不同。時間結束或生命歸零時進入結算畫面。</p>
+                <p>每個模式都有不同時間與生命。生命歸零或時間結束時，遊戲立即結束並進入結算畫面。</p>
               </article>
+
               <article>
                 <span class="rule-num">03</span>
                 <h3>連擊倍率</h3>
-                <p>連續命中會提升連擊與倍率。失誤會中斷連擊，因此穩定比盲目快速更重要。</p>
+                <p>連續命中會增加連擊。每 5 連擊會提高倍率，分數會越來越高；任何失誤都會中斷連擊。</p>
               </article>
+
               <article>
                 <span class="rule-num">04</span>
                 <h3>評級系統</h3>
-                <p>評級會參考分數、準確率、平均反應、最高連擊與失誤數。</p>
+                <p>評級不只看分數，也會看準確率、平均反應時間、最高連擊與失誤次數。最高評級是 SSS。</p>
               </article>
             </div>
 
@@ -204,20 +205,21 @@
               <h3>目標與陷阱</h3>
               <div class="target-rule-list">
                 <div><i class="dot normal"></i><strong>白色目標</strong><span>一般目標，點中即可得分。</span></div>
-                <div><i class="dot gold"></i><strong>金色目標</strong><span>獎勵目標，得分較高並增加 2 秒。</span></div>
-                <div><i class="dot red"></i><strong>紅色炸彈</strong><span>扣分、扣生命並中斷連擊。</span></div>
-                <div><i class="dot purple"></i><strong>紫色假目標</strong><span>扣分並中斷連擊。</span></div>
-                <div><i class="dot cyan"></i><strong>藍色冰凍</strong><span>扣分、扣生命、扣時間並短暫鎖住操作。</span></div>
+                <div><i class="dot gold"></i><strong>金色目標</strong><span>獎勵目標，得分更高，並額外增加 2 秒。</span></div>
+                <div><i class="dot red"></i><strong>紅色炸彈</strong><span>危險陷阱，扣分、扣生命，並中斷連擊。</span></div>
+                <div><i class="dot purple"></i><strong>紫色假目標</strong><span>誘餌陷阱，扣分並中斷連擊，但不扣生命。</span></div>
+                <div><i class="dot cyan"></i><strong>藍色冰凍</strong><span>冰凍陷阱，扣分、扣生命、扣時間，並短暫鎖住操作。</span></div>
               </div>
             </div>
 
             <div class="scoring-box">
-              <h3>拿高分重點</h3>
+              <h3>計分重點</h3>
               <ul>
-                <li>先判斷顏色，再點擊。</li>
-                <li>保持高準確率比盲目亂點更有效。</li>
-                <li>維持連擊可以提高倍率，後期分數成長更快。</li>
-                <li>金色目標能延長時間，是衝高分的關鍵。</li>
+                <li>反應越快，單次命中分數越高。</li>
+                <li>連擊越高，倍率越高，後期分數會暴增。</li>
+                <li>點錯空白處會扣分並斷連擊。</li>
+                <li>漏掉白色或金色目標會扣分、扣生命並斷連擊。</li>
+                <li>想拿 S 以上，重點不是亂點快，而是保持高準確率與高連擊。</li>
               </ul>
             </div>
           </div>
