@@ -21,12 +21,12 @@
       </div>
 
       <div class="header-actions">
-        <button id="soundToggle" class="icon-btn" type="button" aria-label="切換音效">音效 ON</button>
+        <button id="soundToggle" class="icon-btn" type="button">音效 ON</button>
         <button id="rulesOpenTop" class="icon-btn" type="button">遊戲規則</button>
       </div>
     </header>
 
-    <section class="arena-frame">
+    <section class="arena-frame" id="arena">
       <aside class="side-panel">
         <div class="status-card player-card">
           <span class="label">STATUS</span>
@@ -41,188 +41,112 @@
           </div>
           <div class="stat">
             <span>時間</span>
-            <strong><span id="time">30</span>s</strong>
+            <strong id="time">0s</strong>
           </div>
           <div class="stat">
-            <span>生命</span>
-            <strong id="lives">♥♥♥</strong>
+            <span>生命值</span>
+            <strong id="lives" class="danger-text">♥♥♥</strong>
           </div>
           <div class="stat">
-            <span>連擊</span>
+            <span>目前倍率</span>
+            <strong id="multiplier">x1</strong>
+          </div>
+          <div class="stat">
+            <span>目前連擊</span>
             <strong id="combo">0</strong>
           </div>
           <div class="stat">
-            <span>倍率</span>
-            <strong id="multiplier">x1.00</strong>
-          </div>
-          <div class="stat">
-            <span>準確率</span>
+            <span>擊中率</span>
             <strong id="accuracy">100%</strong>
           </div>
         </div>
 
-        <div class="meter-block">
-          <div class="meter-head">
-            <span>COMBO ENERGY</span>
-            <strong id="energyText">0%</strong>
-          </div>
-          <div class="meter"><div id="energyFill"></div></div>
-        </div>
-
-        <div class="legend">
-          <h2>目標說明</h2>
-          <div><i class="dot normal"></i><span>白色：一般目標</span></div>
-          <div><i class="dot gold"></i><span>金色：獎勵 +2 秒</span></div>
-          <div><i class="dot red"></i><span>紅色：炸彈陷阱</span></div>
-          <div><i class="dot purple"></i><span>紫色：假目標陷阱</span></div>
-          <div><i class="dot cyan"></i><span>藍色：冰凍陷阱</span></div>
+        <div class="energy-bar">
+          <div class="energy-fill" id="energyFill"></div>
+          <span class="energy-text" id="energyText">COMBO ENERGY 0%</span>
         </div>
       </aside>
 
-      <section id="arena" class="arena" aria-label="遊戲區域">
-        <div class="scan-line"></div>
-        <div id="floatingTextLayer" class="floating-layer"></div>
-        <div id="particleLayer" class="particle-layer"></div>
-
-        <section id="menuScreen" class="screen active">
-          <div class="glass-card menu-card refined-menu">
-            <p class="eyebrow">START SESSION</p>
-            <h2>選擇挑戰模式</h2>
-            <p class="desc">
-              選擇模式後直接開始，點擊正確目標、避開陷阱、維持連擊倍率。
-            </p>
-
-            <div class="mode-select" role="group" aria-label="模式選擇">
-              <button class="mode-btn selected" data-mode="classic" type="button">
-                <strong>Classic</strong>
-                <span>30 秒標準挑戰，適合熟悉節奏與規則。</span>
-              </button>
-              <button class="mode-btn" data-mode="rush" type="button">
-                <strong>Rush</strong>
-                <span>45 秒高速節奏，目標更快，分數倍率更高。</span>
-              </button>
-              <button class="mode-btn" data-mode="survival" type="button">
-                <strong>Survival</strong>
-                <span>60 秒穩定生存，考驗專注力與失誤控制。</span>
-              </button>
-            </div>
-
-            <div class="button-row">
-              <button id="startGame" class="primary-btn" type="button">開始遊戲</button>
-              <button id="rulesOpenMenu" class="secondary-btn" type="button">查看規則</button>
-            </div>
-
-            <div class="quick-rules">
-              <strong>快速規則：</strong>
-              <span>點白色與金色目標得分，避開紅色、紫色、藍色陷阱。連擊越高，倍率越高。</span>
-            </div>
-          </div>
-        </section>
-
-        <section id="pauseScreen" class="screen">
-          <div class="glass-card compact-card">
-            <p class="eyebrow">PAUSED</p>
-            <h2>已暫停</h2>
-            <p class="desc">按空白鍵或下方按鈕繼續。</p>
-            <button id="resumeGame" class="primary-btn" type="button">繼續遊戲</button>
-          </div>
-        </section>
-
-        <section id="resultScreen" class="screen">
-          <div class="glass-card result-card">
-            <p class="eyebrow">RESULT</p>
-            <h2 id="resultTitle">遊戲結束</h2>
-            <p id="resultSummary" class="desc">你的結果會顯示在這裡。</p>
-
-            <div class="rank-panel">
-              <span id="rankBadge" class="rank-badge rank-c">C</span>
-              <div>
-                <strong id="rankScore">0 / 100</strong>
-                <p id="rankComment">繼續練習。</p>
+      <div class="arena-playbed">
+        <div class="overlay-screen active" id="menuScreen">
+          <h2>選擇訓練模式</h2>
+          <div class="mode-options">
+            <label class="mode-card">
+              <input type="radio" name="mode-select" value="classic" checked />
+              <div class="card-meta">
+                <h3>經典模式</h3>
+                <p>45秒、3顆心。動態難度增長。</p>
               </div>
-            </div>
+            </label>
+            <label class="mode-card">
+              <input type="radio" name="mode-select" value="rush" />
+              <div class="card-meta">
+                <h3>極速狂飆</h3>
+                <p>30秒、無限生命。挑戰極限擊中數。</p>
+              </div>
+            </label>
+            <label class="mode-card">
+              <input type="radio" name="mode-select" value="survival" />
+              <div class="card-meta">
+                <h3>極限生存</h3>
+                <p>無限時間、僅1條命。漏掉任何目標即結束。</p>
+              </div>
+            </label>
+          </div>
+          <p class="menu-desc" id="menuDesc">時間與生命兼具的平衡挑戰</p>
+          <button id="startGame" class="action-btn cta" type="button">進入擂台</button>
+          <button id="rulesOpenMenu" class="action-btn sec" type="button">查看詳細規則</button>
+        </div>
 
-            <div class="result-stats">
-              <div><span>命中</span><strong id="finalHits">0</strong></div>
-              <div><span>失誤</span><strong id="finalMisses">0</strong></div>
-              <div><span>最高連擊</span><strong id="finalBestCombo">0</strong></div>
-              <div><span>平均反應</span><strong id="finalReaction">0ms</strong></div>
-            </div>
+        <div class="overlay-screen" id="pauseScreen">
+          <h2>系統已暫停</h2>
+          <p>按下 ESC 或下方按鈕回到戰局</p>
+          <button id="resumeGame" class="action-btn cta" type="button">恢復遊戲</button>
+        </div>
 
-            <div class="button-row">
-              <button id="playAgain" class="primary-btn" type="button">再玩一次</button>
-              <button id="backToMenu" class="secondary-btn" type="button">回主選單</button>
+        <div class="overlay-screen" id="resultScreen">
+          <p id="resultSummary" class="subtitle">任務結算</p>
+          <div class="result-layout">
+            <div class="rank-zone">
+              <div id="rankBadge" class="rank-badge">A</div>
+              <div id="rankScore" class="rank-score">0 PTS</div>
+              <p id="rankComment" class="rank-comment">再接再厲！</p>
+            </div>
+            <div class="detail-zone">
+              <div class="row"><span>成功擊中</span><strong id="finalHits">0</strong></div>
+              <div class="row"><span>失誤次數</span><strong id="finalMisses">0</strong></div>
+              <div class="row"><span>最高連擊</span><strong id="finalBestCombo">0</strong></div>
+              <div class="row"><span>平均反應時間</span><strong id="finalReaction">0 ms</strong></div>
             </div>
           </div>
-        </section>
-
-        <section id="rulesScreen" class="screen">
-          <div class="glass-card rules-card">
-            <div class="screen-head">
-              <div>
-                <p class="eyebrow">HOW TO PLAY</p>
-                <h2>遊戲規則</h2>
-              </div>
-              <button id="rulesClose" class="icon-btn" type="button">關閉</button>
-            </div>
-
-            <p class="desc">
-              核心是「快、準、穩」。你要在時間結束前點擊正確目標、避開陷阱、累積連擊倍率，打出最高分與最高評級。
-            </p>
-
-            <div class="rules-grid">
-              <article>
-                <span class="rule-num">01</span>
-                <h3>基本玩法</h3>
-                <p>目標會隨機出現在場地中。點擊正確目標會得分；點錯空白處、漏點目標或點到陷阱都會受到懲罰。</p>
-              </article>
-
-              <article>
-                <span class="rule-num">02</span>
-                <h3>時間與生命</h3>
-                <p>每個模式都有不同時間與生命。生命歸零或時間結束時，遊戲立即結束並進入結算畫面。</p>
-              </article>
-
-              <article>
-                <span class="rule-num">03</span>
-                <h3>連擊倍率</h3>
-                <p>連續命中會增加連擊。每 5 連擊會提高倍率，分數會越來越高；任何失誤都會中斷連擊。</p>
-              </article>
-
-              <article>
-                <span class="rule-num">04</span>
-                <h3>評級系統</h3>
-                <p>評級不只看分數，也會看準確率、平均反應時間、最高連擊與失誤次數。最高評級是 SSS。</p>
-              </article>
-            </div>
-
-            <div class="target-rules">
-              <h3>目標與陷阱</h3>
-              <div class="target-rule-list">
-                <div><i class="dot normal"></i><strong>白色目標</strong><span>一般目標，點中即可得分。</span></div>
-                <div><i class="dot gold"></i><strong>金色目標</strong><span>獎勵目標，得分更高，並額外增加 2 秒。</span></div>
-                <div><i class="dot red"></i><strong>紅色炸彈</strong><span>危險陷阱，扣分、扣生命，並中斷連擊。</span></div>
-                <div><i class="dot purple"></i><strong>紫色假目標</strong><span>誘餌陷阱，扣分並中斷連擊，但不扣生命。</span></div>
-                <div><i class="dot cyan"></i><strong>藍色冰凍</strong><span>冰凍陷阱，扣分、扣生命、扣時間，並短暫鎖住操作。</span></div>
-              </div>
-            </div>
-
-            <div class="scoring-box">
-              <h3>計分重點</h3>
-              <ul>
-                <li>反應越快，單次命中分數越高。</li>
-                <li>連擊越高，倍率越高，後期分數會暴增。</li>
-                <li>點錯空白處會扣分並斷連擊。</li>
-                <li>漏掉白色或金色目標會扣分、扣生命並斷連擊。</li>
-                <li>想拿 S 以上，重點不是亂點快，而是保持高準確率與高連擊。</li>
-              </ul>
-            </div>
+          <div class="result-actions">
+            <button id="playAgain" class="action-btn cta" type="button">再次挑戰</button>
+            <button id="backToMenu" class="action-btn sec" type="button">返回主選單</button>
           </div>
-        </section>
+        </div>
 
-        <div id="toast" class="toast" aria-live="polite"></div>
-      </section>
+        <div id="floatingTextLayer" class="hud-layer"></div>
+        <div id="particleLayer" class="hud-layer"></div>
+      </div>
     </section>
+
+    <div class="modal-rules" id="rulesScreen">
+      <div class="modal-body">
+        <h2>Reaction Arena 戰術規則</h2>
+        <div class="modal-scroll">
+          <div class="grid-rules">
+            <article><h3>核心目標</h3><p>在限定時間內點擊隨機出現的目標。連擊越高，倍率分數越高。任何失誤或漏點（一般目標）都會中斷連擊。</p></article>
+            <article><h3>目標與陷阱</h3>
+              <p>⚪ 白色：普通目標。<br>🟡 金色：高分目標，且額外加 2 秒時間。<br>🔴 紅色炸彈：扣分、扣生命、斷連擊。<br>🟣 紫色誘餌：扣分、斷連擊，但不扣生命。<br>🔵 藍色冰凍：扣分、扣生命、扣 3 秒，並短暫鎖死點擊區。</p>
+            </article>
+            <article><h3>狂暴模式 (Fever)</h3><p>當 Combo 累積達到 20 的倍數（能量條全滿）時，將觸發 5 秒狂暴。此時場上所有陷阱與炸彈全部被程式逆轉為「金色加分目標」，點擊可獲得大量分數！</p></article>
+          </div>
+        </div>
+        <button id="rulesClose" class="action-btn cta" type="button">我明白了</button>
+      </div>
+    </div>
+
+    <div id="toast" class="toast-box"></div>
   </main>
 
   <script src="script.js"></script>
