@@ -2,9 +2,9 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#050711" />
-  <title>Reaction Arena</title>
+  <title>Reaction Arena｜Precision Click</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -12,22 +12,25 @@
   <div class="bg-orb orb-b"></div>
   <div class="noise"></div>
 
-  <main class="shell">
+  <main class="shell" aria-label="Precision Click 遊戲主畫面">
     <header class="game-header">
-      <div>
+      <div class="title-block">
         <p class="brand">REACTION / FOCUS / CONTROL</p>
         <h1>Reaction Arena</h1>
         <p class="tagline">精準反應訓練場</p>
       </div>
 
       <div class="header-actions">
+        <button id="pauseTop" class="icon-btn" type="button" aria-label="暫停或繼續遊戲">暫停</button>
+        <button id="fullscreenBtn" class="icon-btn" type="button" aria-label="切換全螢幕">全螢幕</button>
         <button id="soundToggle" class="icon-btn" type="button" aria-label="切換音效">音效 ON</button>
-        <button id="rulesOpenTop" class="icon-btn" type="button">遊戲規則</button>
+        <button id="settingsOpen" class="icon-btn" type="button">設定</button>
+        <button id="rulesOpenTop" class="icon-btn" type="button">規則</button>
       </div>
     </header>
 
     <section class="arena-frame">
-      <aside class="side-panel">
+      <aside class="side-panel" aria-label="遊戲狀態資訊">
         <div class="status-card player-card">
           <span class="label">STATUS</span>
           <strong id="playerDisplay">READY</strong>
@@ -35,42 +38,30 @@
         </div>
 
         <div class="stat-grid" aria-live="polite">
-          <div class="stat">
-            <span>分數</span>
-            <strong id="score">0</strong>
-          </div>
-          <div class="stat">
-            <span>最高分</span>
-            <strong id="bestScore">0</strong>
-          </div>
-          <div class="stat">
-            <span>時間</span>
-            <strong><span id="time">30</span>s</strong>
-          </div>
-          <div class="stat">
-            <span>生命</span>
-            <strong id="lives">♥♥♥</strong>
-          </div>
-          <div class="stat">
-            <span>連擊</span>
-            <strong id="combo">0</strong>
-          </div>
-          <div class="stat">
-            <span>倍率</span>
-            <strong id="multiplier">x1.00</strong>
-          </div>
-          <div class="stat">
-            <span>準確率</span>
-            <strong id="accuracy">100%</strong>
-          </div>
+          <div class="stat"><span>分數</span><strong id="score">0</strong></div>
+          <div class="stat"><span>模式最高</span><strong id="bestScore">0</strong></div>
+          <div class="stat"><span>時間</span><strong><span id="time">30</span>s</strong></div>
+          <div class="stat"><span>生命</span><strong id="lives">♥♥♥</strong></div>
+          <div class="stat"><span>連擊</span><strong id="combo">0</strong></div>
+          <div class="stat"><span>倍率</span><strong id="multiplier">x1.00</strong></div>
+          <div class="stat"><span>準確率</span><strong id="accuracy">100%</strong></div>
+          <div class="stat"><span>難度</span><strong id="difficultyDisplay">Normal</strong></div>
         </div>
 
         <div class="meter-block">
           <div class="meter-head">
-            <span>COMBO ENERGY</span>
+            <span>FEVER ENERGY</span>
             <strong id="energyText">0%</strong>
           </div>
           <div class="meter"><div id="energyFill"></div></div>
+        </div>
+
+        <div class="record-card">
+          <h2>遊玩紀錄</h2>
+          <div><span>總場次</span><strong id="recordPlays">0</strong></div>
+          <div><span>歷史最高</span><strong id="recordGlobalBest">0</strong></div>
+          <div><span>最長連擊</span><strong id="recordBestCombo">0</strong></div>
+          <div><span>平均準確</span><strong id="recordAvgAccuracy">100%</strong></div>
         </div>
 
         <div class="legend">
@@ -88,14 +79,16 @@
         <div id="floatingTextLayer" class="floating-layer"></div>
         <div id="particleLayer" class="particle-layer"></div>
 
+        <div id="feverBanner" class="fever-banner" aria-live="polite">FEVER MODE</div>
+        <div id="toast" class="toast" aria-live="polite"></div>
+
         <section id="menuScreen" class="screen active">
           <div class="glass-card menu-card refined-menu">
             <p class="eyebrow">START SESSION</p>
             <h2>選擇挑戰模式</h2>
-            <p class="desc">
-              選擇模式後直接開始，點擊正確目標、避開陷阱、維持連擊倍率。
-            </p>
+            <p class="desc">選擇模式與難度後開始。點擊正確目標、避開陷阱、維持連擊倍率，並盡量觸發 Fever Mode。</p>
 
+            <div class="panel-label">模式</div>
             <div class="mode-select" role="group" aria-label="模式選擇">
               <button class="mode-btn selected" data-mode="classic" type="button">
                 <strong>Classic</strong>
@@ -111,6 +104,14 @@
               </button>
             </div>
 
+            <div class="panel-label">難度</div>
+            <div class="difficulty-select" role="group" aria-label="難度選擇">
+              <button class="difficulty-btn" data-difficulty="easy" type="button">Easy</button>
+              <button class="difficulty-btn selected" data-difficulty="normal" type="button">Normal</button>
+              <button class="difficulty-btn" data-difficulty="hard" type="button">Hard</button>
+              <button class="difficulty-btn" data-difficulty="expert" type="button">Expert</button>
+            </div>
+
             <div class="button-row">
               <button id="startGame" class="primary-btn" type="button">開始遊戲</button>
               <button id="rulesOpenMenu" class="secondary-btn" type="button">查看規則</button>
@@ -118,7 +119,7 @@
 
             <div class="quick-rules">
               <strong>快速規則：</strong>
-              <span>點白色與金色目標得分，避開紅色、紫色、藍色陷阱。連擊越高，倍率越高。</span>
+              <span>白色與金色可以點；紅色、紫色、藍色不要點。Combo 滿 20 會啟動 Fever Mode，短時間分數加成。</span>
             </div>
           </div>
         </section>
@@ -127,8 +128,12 @@
           <div class="glass-card compact-card">
             <p class="eyebrow">PAUSED</p>
             <h2>已暫停</h2>
-            <p class="desc">按空白鍵或下方按鈕繼續。</p>
-            <button id="resumeGame" class="primary-btn" type="button">繼續遊戲</button>
+            <p class="desc">按空白鍵 / Esc 或下方按鈕繼續。你也可以直接回主選單。</p>
+            <div class="button-row center-row">
+              <button id="resumeGame" class="primary-btn" type="button">繼續遊戲</button>
+              <button id="restartFromPause" class="secondary-btn" type="button">重新開始</button>
+              <button id="menuFromPause" class="secondary-btn" type="button">回主選單</button>
+            </div>
           </div>
         </section>
 
@@ -152,6 +157,10 @@
               <div><span>失誤</span><strong id="finalMisses">0</strong></div>
               <div><span>最高連擊</span><strong id="finalBestCombo">0</strong></div>
               <div><span>平均反應</span><strong id="finalReaction">0ms</strong></div>
+              <div><span>Fever 次數</span><strong id="finalFever">0</strong></div>
+              <div><span>模式最高</span><strong id="finalModeBest">0</strong></div>
+              <div><span>歷史最高</span><strong id="finalGlobalBest">0</strong></div>
+              <div><span>連續失誤</span><strong id="finalMissStreak">0</strong></div>
             </div>
 
             <div class="button-row">
@@ -171,61 +180,78 @@
               <button id="rulesClose" class="icon-btn" type="button">關閉</button>
             </div>
 
-            <p class="desc">
-              核心是「快、準、穩」。你要在時間結束前點擊正確目標、避開陷阱、累積連擊倍率，打出最高分與最高評級。
-            </p>
+            <div class="rules-content">
+              <p class="desc">核心是「快、準、穩」。命中正確目標得分，錯點、漏點與點到陷阱都會中斷連擊並造成懲罰。</p>
 
-            <div class="rules-grid">
-              <article>
-                <span class="rule-num">01</span>
-                <h3>基本玩法</h3>
-                <p>目標會隨機出現在場地中。點擊正確目標會得分；點錯空白處、漏點目標或點到陷阱都會受到懲罰。</p>
-              </article>
-
-              <article>
-                <span class="rule-num">02</span>
-                <h3>時間與生命</h3>
-                <p>每個模式都有不同時間與生命。生命歸零或時間結束時，遊戲立即結束並進入結算畫面。</p>
-              </article>
-
-              <article>
-                <span class="rule-num">03</span>
-                <h3>連擊倍率</h3>
-                <p>連續命中會增加連擊。每 5 連擊會提高倍率，分數會越來越高；任何失誤都會中斷連擊。</p>
-              </article>
-
-              <article>
-                <span class="rule-num">04</span>
-                <h3>評級系統</h3>
-                <p>評級不只看分數，也會看準確率、平均反應時間、最高連擊與失誤次數。最高評級是 SSS。</p>
-              </article>
-            </div>
-
-            <div class="target-rules">
-              <h3>目標與陷阱</h3>
-              <div class="target-rule-list">
-                <div><i class="dot normal"></i><strong>白色目標</strong><span>一般目標，點中即可得分。</span></div>
-                <div><i class="dot gold"></i><strong>金色目標</strong><span>獎勵目標，得分更高，並額外增加 2 秒。</span></div>
-                <div><i class="dot red"></i><strong>紅色炸彈</strong><span>危險陷阱，扣分、扣生命，並中斷連擊。</span></div>
-                <div><i class="dot purple"></i><strong>紫色假目標</strong><span>誘餌陷阱，扣分並中斷連擊，但不扣生命。</span></div>
-                <div><i class="dot cyan"></i><strong>藍色冰凍</strong><span>冰凍陷阱，扣分、扣生命、扣時間，並短暫鎖住操作。</span></div>
+              <div class="rules-grid">
+                <article><span class="rule-num">01</span><h3>基本玩法</h3><p>目標會隨機出現在場地中。白色與金色是可點目標，其餘顏色是陷阱。</p></article>
+                <article><span class="rule-num">02</span><h3>難度選擇</h3><p>難度會影響目標大小、出現速度、分數倍率與陷阱比例。</p></article>
+                <article><span class="rule-num">03</span><h3>連擊倍率</h3><p>每 5 連擊會提升倍率；任何失誤都會斷連擊。</p></article>
+                <article><span class="rule-num">04</span><h3>Fever Mode</h3><p>Combo 能量滿 100% 時會啟動 Fever，短時間提高分數並強化回饋。</p></article>
               </div>
-            </div>
 
-            <div class="scoring-box">
-              <h3>計分重點</h3>
-              <ul>
-                <li>反應越快，單次命中分數越高。</li>
-                <li>連擊越高，倍率越高，後期分數會暴增。</li>
-                <li>點錯空白處會扣分並斷連擊。</li>
-                <li>漏掉白色或金色目標會扣分、扣生命並斷連擊。</li>
-                <li>想拿 S 以上，重點不是亂點快，而是保持高準確率與高連擊。</li>
-              </ul>
+              <div class="target-rules">
+                <h3>模式差異</h3>
+                <div class="mode-rules">
+                  <div><strong>Classic</strong><span>標準模式，最適合穩定練習。</span></div>
+                  <div><strong>Rush</strong><span>速度更快，得分倍率更高，但更容易失誤。</span></div>
+                  <div><strong>Survival</strong><span>時間較長、生命較多，重點是減少失誤。</span></div>
+                </div>
+              </div>
+
+              <div class="target-rules">
+                <h3>目標與陷阱</h3>
+                <div class="target-rule-list">
+                  <div><i class="dot normal"></i><strong>白色目標</strong><span>一般目標，點中即可得分。</span></div>
+                  <div><i class="dot gold"></i><strong>金色目標</strong><span>獎勵目標，得分更高，並額外增加 2 秒。</span></div>
+                  <div><i class="dot red"></i><strong>紅色炸彈</strong><span>扣分、扣生命，並中斷連擊。</span></div>
+                  <div><i class="dot purple"></i><strong>紫色假目標</strong><span>扣分並中斷連擊，但不扣生命。</span></div>
+                  <div><i class="dot cyan"></i><strong>藍色冰凍</strong><span>扣分、扣生命、扣時間，並短暫鎖住操作。</span></div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <div id="toast" class="toast" aria-live="polite"></div>
+        <section id="settingsScreen" class="screen">
+          <div class="glass-card settings-card">
+            <div class="screen-head">
+              <div>
+                <p class="eyebrow">SETTINGS</p>
+                <h2>遊戲設定</h2>
+              </div>
+              <button id="settingsClose" class="icon-btn" type="button">關閉</button>
+            </div>
+
+            <div class="settings-grid">
+              <label class="setting-row">
+                <span><strong>音效</strong><small>開啟或關閉遊戲聲音</small></span>
+                <input id="soundSetting" type="checkbox" checked />
+              </label>
+              <label class="setting-row">
+                <span><strong>震動</strong><small>手機支援時，命中與失誤會震動</small></span>
+                <input id="vibrationSetting" type="checkbox" checked />
+              </label>
+              <label class="setting-row">
+                <span><strong>動畫強度</strong><small>降低動畫可讓低階裝置更順</small></span>
+                <select id="animationSetting">
+                  <option value="high">高</option>
+                  <option value="medium" selected>中</option>
+                  <option value="low">低</option>
+                </select>
+              </label>
+              <label class="setting-row">
+                <span><strong>音量</strong><small>這版預設已加大聲</small></span>
+                <input id="volumeSetting" type="range" min="0" max="100" value="82" />
+              </label>
+            </div>
+
+            <div class="button-row">
+              <button id="resetRecords" class="secondary-btn danger-btn" type="button">清除紀錄</button>
+              <button id="settingsDone" class="primary-btn" type="button">完成</button>
+            </div>
+          </div>
+        </section>
       </section>
     </section>
   </main>
