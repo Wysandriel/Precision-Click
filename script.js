@@ -250,7 +250,8 @@
     }
 
     document.addEventListener("touchmove", (event) => {
-      if (!event.target.closest(".glass-card, .side-panel")) {
+      const scrollable = event.target.closest(".glass-card, .side-panel, .rules-content, .settings-grid, .result-card, .menu-card");
+      if (!scrollable) {
         event.preventDefault();
       }
     }, { passive: false });
@@ -1258,18 +1259,21 @@
   }
 
   function openRules() {
+    setAppHeight?.();
     previousOverlayScreen = getActiveScreen();
     if (state.running) pauseGame();
     showScreen(els.rulesScreen);
   }
 
   function closeRules() {
+    setAppHeight?.();
     if (state.running) showScreen(els.pauseScreen);
     else showScreen(previousOverlayScreen || els.menuScreen);
     previousOverlayScreen = null;
   }
 
   function openSettings() {
+    setAppHeight?.();
     syncSettingsUI();
     previousOverlayScreen = getActiveScreen();
     if (state.running) pauseGame();
@@ -1277,6 +1281,7 @@
   }
 
   function closeSettings() {
+    setAppHeight?.();
     if (state.running) showScreen(els.pauseScreen);
     else showScreen(previousOverlayScreen || els.menuScreen);
     previousOverlayScreen = null;
