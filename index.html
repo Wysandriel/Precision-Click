@@ -61,6 +61,7 @@
           <div><span>歷史最高</span><strong id="recordGlobalBest">0</strong></div>
           <div><span>最長連擊</span><strong id="recordBestCombo">0</strong></div>
           <div><span>平均準確</span><strong id="recordAvgAccuracy">100%</strong></div>
+          <div><span>玩家等級</span><strong id="recordLevel">Lv.1</strong></div>
         </div>
       </aside>
 
@@ -77,6 +78,18 @@
             <p class="eyebrow">START SESSION</p>
             <h2>選擇挑戰模式</h2>
             <p class="desc">選擇模式與難度後開始。點擊正確目標、避開陷阱、維持連擊倍率，並盡量觸發 Fever Mode。</p>
+
+            <div class="challenge-card" aria-label="本局挑戰任務">
+              <div class="challenge-head">
+                <strong>本局挑戰</strong>
+                <span id="levelPreview">Lv.1</span>
+              </div>
+              <div class="challenge-list">
+                <div id="challengeOne">達成指定分數</div>
+                <div id="challengeTwo">維持指定連擊</div>
+                <div id="challengeThree">保持指定準確率</div>
+              </div>
+            </div>
 
             <div class="panel-label">模式</div>
             <div class="mode-select" role="group" aria-label="模式選擇">
@@ -138,6 +151,7 @@
             </div>
 
             <div id="resultAdvice" class="result-advice">下一局建議會顯示在這裡。</div>
+            <div id="missionResults" class="mission-results">本局挑戰結果會顯示在這裡。</div>
 
             <div class="result-stats">
               <div><span>命中</span><strong id="finalHits">0</strong></div>
@@ -148,6 +162,7 @@
               <div><span>模式最高</span><strong id="finalModeBest">0</strong></div>
               <div><span>歷史最高</span><strong id="finalGlobalBest">0</strong></div>
               <div><span>連續失誤</span><strong id="finalMissStreak">0</strong></div>
+              <div><span>XP 獲得</span><strong id="finalXp">0</strong></div>
             </div>
 
             <div class="button-row">
@@ -175,6 +190,7 @@
                 <article><span class="rule-num">02</span><h3>難度選擇</h3><p>難度會影響目標大小、出現速度、分數倍率與陷阱比例。</p></article>
                 <article><span class="rule-num">03</span><h3>連擊倍率</h3><p>每 5 連擊會提升倍率；任何失誤都會斷連擊。</p></article>
                 <article><span class="rule-num">04</span><h3>Fever Mode</h3><p>Combo 能量滿 100% 時會啟動 Fever，短時間提高分數並強化回饋。</p></article>
+                <article><span class="rule-num">05</span><h3>本局挑戰</h3><p>每局會給 3 個小目標，完成後能取得額外 XP 與結算鼓勵。</p></article>
               </div>
 
               <div class="target-rules">

@@ -56,6 +56,12 @@
     recordGlobalBest: $("#recordGlobalBest"),
     recordBestCombo: $("#recordBestCombo"),
     recordAvgAccuracy: $("#recordAvgAccuracy"),
+    recordLevel: $("#recordLevel"),
+
+    challengeOne: $("#challengeOne"),
+    challengeTwo: $("#challengeTwo"),
+    challengeThree: $("#challengeThree"),
+    levelPreview: $("#levelPreview"),
 
     resultTitle: $("#resultTitle"),
     resultSummary: $("#resultSummary"),
@@ -71,7 +77,9 @@
     finalModeBest: $("#finalModeBest"),
     finalGlobalBest: $("#finalGlobalBest"),
     finalMissStreak: $("#finalMissStreak"),
-    resultAdvice: $("#resultAdvice")
+    finalXp: $("#finalXp"),
+    resultAdvice: $("#resultAdvice"),
+    missionResults: $("#missionResults")
   };
 
   const STORAGE = {
@@ -165,7 +173,8 @@
     bestCombo: 0,
     totalAccuracy: 0,
     accuracySamples: 0,
-    lastScore: 0
+    lastScore: 0,
+    xp: 0
   };
 
   let selectedMode = "classic";
@@ -212,7 +221,11 @@
     achievements: new Set(),
     inputLockedUntil: 0,
     lastTargetX: null,
-    lastTargetY: null
+    lastTargetY: null,
+    runGoals: [],
+    completedGoals: new Set(),
+    nearBestToastShown: false,
+    xpEarned: 0
   };
 
   function setAppHeight() {
@@ -265,6 +278,7 @@
     updateRecordsUI();
     selectMode(selectedMode);
     selectDifficulty(selectedDifficulty);
+    updateChallengePreview();
     updateControlState();
 
     $$(".mode-btn").forEach((button) => {
@@ -388,6 +402,7 @@
     $$(".mode-btn").forEach((button) => {
       button.classList.toggle("selected", button.dataset.mode === selectedMode);
     });
+    updateChallengePreview();
     updateHud();
   }
 
@@ -396,6 +411,7 @@
     $$(".difficulty-btn").forEach((button) => {
       button.classList.toggle("selected", button.dataset.difficulty === selectedDifficulty);
     });
+    updateChallengePreview();
     updateHud();
   }
 
@@ -425,8 +441,10 @@
     state.inputLockedUntil = performance.now() + 420;
     state.lastTargetX = null;
     state.lastTargetY = null;
-    state.lastTargetX = null;
-    state.lastTargetY = null;
+    state.runGoals = buildRunGoals();
+    state.completedGoals = new Set();
+    state.nearBestToastShown = false;
+    state.xpEarned = 0;
 
     els.playerDisplay.textContent = "ACTIVE";
     els.modeDisplay.textContent = `${mode.label} / ${mode.description}`;
@@ -444,7 +462,9 @@
 
     playSound("start");
     vibrate(18);
+    updateChallengePreview();
     updateHud();
+    updateRecordsUI();
     updateControlState();
     spawnTarget();
   }
@@ -485,8 +505,9 @@
     els.arena.classList.remove("frozen");
 
     const stats = getStats();
+    checkGoalProgress(true);
     const rank = getRank(stats);
-    const bestResult = updateScoresAndRecords(stats);
+    const bestResult = updateScoresAndRecords(stats, rank);
 
     els.resultTitle.textContent = "任務結算";
     els.resultSummary.textContent = `分數 ${state.score}｜準確率 ${stats.accuracy}%｜模式 ${modes[selectedMode].label}｜難度 ${difficulties[selectedDifficulty].label}`;
@@ -503,6 +524,8 @@
     els.finalModeBest.textContent = bestResult.modeBest;
     els.finalGlobalBest.textContent = records.globalBest;
     els.finalMissStreak.textContent = state.worstMissStreak;
+    if (els.finalXp) els.finalXp.textContent = `+${bestResult.xpEarned}`;
+    if (els.missionResults) els.missionResults.innerHTML = getMissionResultMarkup();
     els.highScoreMessage.textContent = bestResult.newModeBest
       ? `新模式紀錄！${modes[selectedMode].label} / ${difficulties[selectedDifficulty].label} 最高分：${bestResult.modeBest}`
       : `目前模式最高分：${bestResult.modeBest}｜歷史最高分：${records.globalBest}`;
@@ -515,7 +538,7 @@
     updateControlState();
   }
 
-  function updateScoresAndRecords(stats) {
+  function updateScoresAndRecords(stats, rank) {
     const key = getScoreKey();
     const previousBest = Number(bestScores[key]) || 0;
     const newModeBest = state.score > previousBest;
@@ -531,11 +554,15 @@
     records.bestCombo = Math.max(records.bestCombo, state.bestCombo);
     records.totalAccuracy += stats.accuracy;
     records.accuracySamples += 1;
+    const xpEarned = getXpGain(stats, rank);
+    state.xpEarned = xpEarned;
+    records.xp = Math.max(0, Number(records.xp) || 0) + xpEarned;
     saveRecords();
 
     return {
       newModeBest,
-      modeBest: Number(bestScores[key]) || previousBest
+      modeBest: Number(bestScores[key]) || previousBest,
+      xpEarned
     };
   }
 
@@ -550,6 +577,7 @@
     els.modeDisplay.textContent = "尚未開始";
     els.arena.classList.remove("frozen");
     showScreen(els.menuScreen);
+    updateChallengePreview();
     updateHud();
     updateControlState();
   }
@@ -797,6 +825,8 @@
 
     flash("hit");
 
+    applyChainReward(x, y);
+
     if (state.combo >= state.nextFeverCombo) {
       triggerFever(x, y);
     } else if (state.combo > 0 && state.combo % 5 === 0) {
@@ -804,6 +834,8 @@
       toast(`${state.combo} 連擊！倍率提升`);
     }
 
+    checkGoalProgress(false);
+    maybeToastNearBest();
     checkAchievements(reaction);
     clearTarget();
     updateHud();
@@ -972,6 +1004,110 @@
     });
   }
 
+  function buildRunGoals() {
+    const mode = modes[selectedMode];
+    const difficulty = difficulties[selectedDifficulty];
+    const difficultyIndex = { easy: 0, normal: 1, hard: 2, expert: 3 }[selectedDifficulty] || 1;
+    const modeScale = { classic: 1, rush: 1.15, survival: 1.1 }[selectedMode] || 1;
+    const scoreTarget = Math.round((2600 + difficultyIndex * 950) * modeScale * difficulty.scoreScale);
+    const comboTarget = [8, 12, 16, 20][difficultyIndex];
+    const accuracyTarget = [78, 82, 86, 90][difficultyIndex];
+
+    return [
+      { key: "score", label: `分數達到 ${scoreTarget}`, target: scoreTarget, points: 90 },
+      { key: "combo", label: `最高連擊達到 ${comboTarget}`, target: comboTarget, points: 80 },
+      { key: "accuracy", label: `準確率維持 ${accuracyTarget}%`, target: accuracyTarget, points: 70 }
+    ];
+  }
+
+  function updateChallengePreview() {
+    const goals = state.running ? state.runGoals : buildRunGoals();
+    const level = getPlayerLevel(records.xp);
+    if (els.levelPreview) els.levelPreview.textContent = `Lv.${level}`;
+    if (els.challengeOne && goals[0]) els.challengeOne.textContent = goals[0].label;
+    if (els.challengeTwo && goals[1]) els.challengeTwo.textContent = goals[1].label;
+    if (els.challengeThree && goals[2]) els.challengeThree.textContent = goals[2].label;
+  }
+
+  function checkGoalProgress(finalCheck) {
+    if (!state.runGoals.length) return;
+    const stats = getStats();
+
+    state.runGoals.forEach((goal) => {
+      if (state.completedGoals.has(goal.key)) return;
+
+      let completed = false;
+      if (goal.key === "score") completed = state.score >= goal.target;
+      if (goal.key === "combo") completed = state.bestCombo >= goal.target;
+      if (goal.key === "accuracy") {
+        completed = stats.attempts >= (finalCheck ? 1 : 8) && stats.accuracy >= goal.target;
+      }
+
+      if (completed) {
+        state.completedGoals.add(goal.key);
+        if (!finalCheck) {
+          state.score += Math.round(goal.points * 1.4);
+          toast(`挑戰完成：${goal.label}`);
+          playSound("combo");
+        }
+      }
+    });
+  }
+
+  function getMissionResultMarkup() {
+    if (!state.runGoals.length) return "";
+
+    return state.runGoals.map((goal) => {
+      const done = state.completedGoals.has(goal.key);
+      const mark = done ? "完成" : "未完成";
+      const className = done ? "done" : "fail";
+      return `<div class="mission-line ${className}"><span>${goal.label}</span><strong>${mark}</strong></div>`;
+    }).join("");
+  }
+
+  function getXpGain(stats, rank) {
+    const missionBonus = state.completedGoals.size * 70;
+    const scoreBonus = Math.floor(state.score / 120);
+    const comboBonus = Math.floor(state.bestCombo * 2.5);
+    const feverBonus = state.feverCount * 25;
+    const rankBonus = Math.max(10, rank.score);
+    const accuracyBonus = stats.accuracy >= 90 ? 45 : stats.accuracy >= 80 ? 25 : 0;
+    return Math.max(25, missionBonus + scoreBonus + comboBonus + feverBonus + rankBonus + accuracyBonus);
+  }
+
+  function getPlayerLevel(xp) {
+    const value = Math.max(0, Number(xp) || 0);
+    return 1 + Math.floor(Math.sqrt(value / 240));
+  }
+
+  function applyChainReward(x, y) {
+    if (state.combo <= 0 || state.combo % 6 !== 0) return;
+    const mode = modes[selectedMode];
+    const difficulty = difficulties[selectedDifficulty];
+    const bonus = Math.round((90 + state.combo * 9) * mode.scoreScale * difficulty.scoreScale * (state.fever ? 1.35 : 1));
+    state.score += bonus;
+    floatText(`CHAIN +${bonus}`, x, y, state.fever ? "fever" : "gold");
+
+    if (state.combo % 12 === 0) {
+      state.timeLeft += 1;
+      toast(`${state.combo} 連擊獎勵：+${bonus} / +1s`);
+    } else {
+      toast(`${state.combo} 連擊獎勵：+${bonus}`);
+    }
+
+    playSound("combo");
+    vibrate(8);
+  }
+
+  function maybeToastNearBest() {
+    const best = getCurrentBestScore();
+    if (state.nearBestToastShown || best < 1200) return;
+    if (state.score >= best * 0.88 && state.score < best) {
+      state.nearBestToastShown = true;
+      toast(`快破紀錄了！差 ${Math.max(1, best - state.score)} 分`);
+    }
+  }
+
   function updateControlState() {
     if (els.pauseTop) {
       els.pauseTop.disabled = !state.running;
@@ -1013,6 +1149,8 @@
       ? Math.round(records.totalAccuracy / records.accuracySamples)
       : 100;
     els.recordAvgAccuracy.textContent = `${avgAccuracy}%`;
+    if (els.recordLevel) els.recordLevel.textContent = `Lv.${getPlayerLevel(records.xp)}`;
+    if (els.levelPreview) els.levelPreview.textContent = `Lv.${getPlayerLevel(records.xp)}`;
   }
 
   function getStats() {
@@ -1066,6 +1204,16 @@
   }
 
   function getResultAdvice(stats, rank) {
+    const completed = state.completedGoals.size;
+    const best = getCurrentBestScore();
+    if (best > 0 && state.score < best && state.score >= best * 0.85) {
+      return `這局很接近紀錄，只差 ${best - state.score} 分。下一局先穩住 Combo，很有機會刷新。`;
+    }
+
+    if (completed >= 2 && rank.score >= 70) {
+      return `本局完成 ${completed}/3 個挑戰，節奏不錯。下一局可以直接挑戰更高難度或衝更長 Combo。`;
+    }
+
     if (stats.attempts === 0) {
       return "下一局先熟悉目標顏色，白色與金色可以點，其他顏色先避開。";
     }
@@ -1352,6 +1500,7 @@
     saveRecords();
     updateHud();
     updateRecordsUI();
+    updateChallengePreview();
     toast("紀錄已清除");
   }
 

@@ -1454,3 +1454,94 @@ body.anim-low .particle {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Engagement upgrade: lightweight challenges and XP feedback. */
+.challenge-card,
+.mission-results {
+  margin: 16px 0 2px;
+  padding: 14px;
+  border: 1px solid rgba(255, 209, 102, 0.22);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(255, 209, 102, 0.08), rgba(34, 211, 238, 0.045)),
+    rgba(255, 255, 255, 0.035);
+}
+
+.challenge-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.challenge-head strong {
+  color: var(--gold);
+  letter-spacing: 0.08em;
+}
+
+.challenge-head span {
+  min-width: 54px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  color: #050711;
+  background: linear-gradient(135deg, #fff7ad, var(--gold));
+  font-size: 0.8rem;
+  font-weight: 1000;
+  text-align: center;
+}
+
+.challenge-list,
+.mission-results {
+  display: grid;
+  gap: 8px;
+}
+
+.challenge-list div,
+.mission-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.035);
+  line-height: 1.35;
+}
+
+.challenge-list div::before,
+.mission-line::before {
+  content: "◆";
+  color: var(--gold);
+  font-size: 0.78rem;
+}
+
+.mission-line.done {
+  color: var(--green);
+  border-color: rgba(81, 247, 161, 0.28);
+  background: rgba(81, 247, 161, 0.055);
+}
+
+.mission-line.fail {
+  color: var(--muted);
+}
+
+.mission-line strong {
+  color: inherit;
+}
+
+@media (max-width: 560px) {
+  .challenge-card,
+  .mission-results {
+    padding: 12px;
+    margin-top: 12px;
+  }
+
+  .challenge-list div,
+  .mission-line {
+    font-size: 0.86rem;
+    align-items: flex-start;
+  }
+}
