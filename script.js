@@ -215,7 +215,49 @@
     lastTargetY: null
   };
 
+  function setAppHeight() {
+    const viewport = window.visualViewport;
+    const height = viewport ? viewport.height : window.innerHeight;
+    document.documentElement.style.setProperty("--app-height", `${Math.round(height)}px`);
+  }
+
+  function installMobileGuards() {
+    setAppHeight();
+
+    window.addEventListener("orientationchange", () => {
+      window.setTimeout(setAppHeight, 120);
+      window.setTimeout(setAppHeight, 420);
+    }, { passive: true });
+
+    window.addEventListener("resize", setAppHeight, { passive: true });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", setAppHeight, { passive: true });
+      window.visualViewport.addEventListener("scroll", setAppHeight, { passive: true });
+    }
+
+    document.addEventListener("touchmove", (event) => {
+      if (!event.target.closest(".glass-card, .side-panel")) {
+        event.preventDefault();
+      }
+    }, { passive: false });
+
+    let lastTouchEnd = 0;
+    document.addEventListener("touchend", (event) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, { passive: false });
+  }
+
+  function isMobileLayout() {
+    return window.matchMedia("(max-width: 820px), (hover: none) and (pointer: coarse)").matches;
+  }
+
   function init() {
+    installMobileGuards();
     setupEffectPools();
     syncSettingsUI();
     applySettings();
@@ -290,6 +332,7 @@
     });
 
     window.addEventListener("resize", () => {
+      setAppHeight();
       window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(() => {
         if (state.running && !state.paused && !state.frozen) {
@@ -380,6 +423,8 @@
     state.nextFeverCombo = FEVER_COMBO_STEP;
     state.achievements = new Set();
     state.inputLockedUntil = performance.now() + 420;
+    state.lastTargetX = null;
+    state.lastTargetY = null;
     state.lastTargetX = null;
     state.lastTargetY = null;
 
@@ -544,11 +589,12 @@
     const mode = modes[selectedMode];
     const difficulty = difficulties[selectedDifficulty];
     const type = chooseTargetType(mode.trapRate, difficulty.trapScale);
-    const baseSize = selectedMode === "rush" ? 52 : 58;
-    const shrink = Math.min(22, Math.floor(state.hits / mode.shrinkEvery) * 2 + Math.floor(state.combo / 15));
-    const size = clamp(baseSize + difficulty.sizeBonus - shrink, 30, 76);
-    const padding = Math.max(size + 22, 56);
-    const { x, y } = getFairTargetPosition(rect, padding, size);
+    const mobile = isMobileLayout();
+    const baseSize = selectedMode === "rush" ? (mobile ? 58 : 52) : (mobile ? 64 : 58);
+    const shrink = Math.min(mobile ? 14 : 22, Math.floor(state.hits / mode.shrinkEvery) * 2 + Math.floor(state.combo / 15));
+    const size = clamp(baseSize + difficulty.sizeBonus - shrink, mobile ? 44 : 30, mobile ? 82 : 76);
+    const safeArea = getTargetSafeArea(rect, size, mobile);
+    const { x, y } = getFairTargetPosition(rect, safeArea, size);
 
     const button = document.createElement("button");
     button.type = "button";
@@ -587,20 +633,50 @@
     }, life);
   }
 
-  function getFairTargetPosition(rect, padding, size) {
-    const maxX = Math.max(padding, rect.width - padding);
-    const maxY = Math.max(padding, rect.height - padding);
-    const minDistance = Math.max(size * 1.8, 96);
-    let best = { x: random(padding, maxX), y: random(padding, maxY) };
+  function getTargetSafeArea(rect, size, mobile) {
+    const edge = Math.max(size + 22, mobile ? 64 : 56);
+    const bottomExtra = mobile ? Math.max(28, size * 0.45) : 0;
+    const topExtra = mobile ? 6 : 0;
 
-    for (let attempt = 0; attempt < 18; attempt += 1) {
-      const candidate = { x: random(padding, maxX), y: random(padding, maxY) };
+    const safe = {
+      minX: edge,
+      maxX: rect.width - edge,
+      minY: edge + topExtra,
+      maxY: rect.height - edge - bottomExtra
+    };
+
+    if (safe.maxX <= safe.minX) {
+      safe.minX = rect.width / 2;
+      safe.maxX = rect.width / 2;
+    }
+
+    if (safe.maxY <= safe.minY) {
+      safe.minY = rect.height / 2;
+      safe.maxY = rect.height / 2;
+    }
+
+    return safe;
+  }
+
+  function getFairTargetPosition(rect, safeArea, size) {
+    const minDistance = Math.max(size * (isMobileLayout() ? 2.05 : 1.8), isMobileLayout() ? 112 : 96);
+    let best = {
+      x: random(safeArea.minX, safeArea.maxX),
+      y: random(safeArea.minY, safeArea.maxY)
+    };
+
+    for (let attempt = 0; attempt < 24; attempt += 1) {
+      const candidate = {
+        x: random(safeArea.minX, safeArea.maxX),
+        y: random(safeArea.minY, safeArea.maxY)
+      };
 
       if (state.lastTargetX === null || state.lastTargetY === null) {
         return candidate;
       }
 
       const distance = Math.hypot(candidate.x - state.lastTargetX, candidate.y - state.lastTargetY);
+
       if (distance >= minDistance) {
         return candidate;
       }
@@ -664,6 +740,7 @@
   function handleTargetPointer(event) {
     event.preventDefault();
     event.stopPropagation();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
 
     if (!state.running || state.paused || state.frozen) return;
 
