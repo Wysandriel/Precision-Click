@@ -71,11 +71,7 @@
     finalModeBest: $("#finalModeBest"),
     finalGlobalBest: $("#finalGlobalBest"),
     finalMissStreak: $("#finalMissStreak"),
-
-    summaryMode: $("#summaryMode"),
-    summaryDifficulty: $("#summaryDifficulty"),
-    summaryTime: $("#summaryTime"),
-    summaryLives: $("#summaryLives")
+    resultAdvice: $("#resultAdvice")
   };
 
   const STORAGE = {
@@ -214,7 +210,9 @@
     lastFrameAt: 0,
     targetTimer: null,
     achievements: new Set(),
-    inputLockedUntil: 0
+    inputLockedUntil: 0,
+    lastTargetX: null,
+    lastTargetY: null
   };
 
   function init() {
@@ -225,7 +223,6 @@
     updateRecordsUI();
     selectMode(selectedMode);
     selectDifficulty(selectedDifficulty);
-    updateSessionSummary();
     updateControlState();
 
     $$(".mode-btn").forEach((button) => {
@@ -348,7 +345,6 @@
     $$(".mode-btn").forEach((button) => {
       button.classList.toggle("selected", button.dataset.mode === selectedMode);
     });
-    updateSessionSummary();
     updateHud();
   }
 
@@ -357,7 +353,6 @@
     $$(".difficulty-btn").forEach((button) => {
       button.classList.toggle("selected", button.dataset.difficulty === selectedDifficulty);
     });
-    updateSessionSummary();
     updateHud();
   }
 
@@ -385,6 +380,8 @@
     state.nextFeverCombo = FEVER_COMBO_STEP;
     state.achievements = new Set();
     state.inputLockedUntil = performance.now() + 420;
+    state.lastTargetX = null;
+    state.lastTargetY = null;
 
     els.playerDisplay.textContent = "ACTIVE";
     els.modeDisplay.textContent = `${mode.label} / ${mode.description}`;
@@ -402,7 +399,6 @@
 
     playSound("start");
     vibrate(18);
-    updateSessionSummary();
     updateHud();
     updateControlState();
     spawnTarget();
@@ -453,6 +449,7 @@
     els.rankBadge.className = `rank-badge ${rank.className}`;
     els.rankScore.textContent = `${rank.score} / 100`;
     els.rankComment.textContent = rank.comment;
+    if (els.resultAdvice) els.resultAdvice.textContent = getResultAdvice(stats, rank);
     els.finalHits.textContent = state.hits;
     els.finalMisses.textContent = state.misses;
     els.finalBestCombo.textContent = state.bestCombo;
@@ -508,7 +505,6 @@
     els.modeDisplay.textContent = "尚未開始";
     els.arena.classList.remove("frozen");
     showScreen(els.menuScreen);
-    updateSessionSummary();
     updateHud();
     updateControlState();
   }
@@ -551,10 +547,8 @@
     const baseSize = selectedMode === "rush" ? 52 : 58;
     const shrink = Math.min(22, Math.floor(state.hits / mode.shrinkEvery) * 2 + Math.floor(state.combo / 15));
     const size = clamp(baseSize + difficulty.sizeBonus - shrink, 30, 76);
-    const padding = Math.max(size + 16, 42);
-
-    const x = random(padding, Math.max(padding, rect.width - padding));
-    const y = random(padding, Math.max(padding, rect.height - padding));
+    const padding = Math.max(size + 22, 56);
+    const { x, y } = getFairTargetPosition(rect, padding, size);
 
     const button = document.createElement("button");
     button.type = "button";
@@ -576,6 +570,8 @@
     els.arena.appendChild(button);
 
     state.currentTarget = button;
+    state.lastTargetX = x;
+    state.lastTargetY = y;
     state.targetBornAt = performance.now();
 
     const life = getTargetLifetime(mode, difficulty);
@@ -591,11 +587,43 @@
     }, life);
   }
 
+  function getFairTargetPosition(rect, padding, size) {
+    const maxX = Math.max(padding, rect.width - padding);
+    const maxY = Math.max(padding, rect.height - padding);
+    const minDistance = Math.max(size * 1.8, 96);
+    let best = { x: random(padding, maxX), y: random(padding, maxY) };
+
+    for (let attempt = 0; attempt < 18; attempt += 1) {
+      const candidate = { x: random(padding, maxX), y: random(padding, maxY) };
+
+      if (state.lastTargetX === null || state.lastTargetY === null) {
+        return candidate;
+      }
+
+      const distance = Math.hypot(candidate.x - state.lastTargetX, candidate.y - state.lastTargetY);
+      if (distance >= minDistance) {
+        return candidate;
+      }
+
+      best = candidate;
+    }
+
+    return best;
+  }
+
   function chooseTargetType(rate, trapScale) {
-    const safeGold = clamp(rate.gold * (1 / Math.max(0.85, trapScale)), 0.07, 0.16);
-    const bomb = clamp(rate.bomb * trapScale, 0.07, 0.23);
-    const decoy = clamp(rate.decoy * trapScale, 0.05, 0.19);
-    const freeze = clamp(rate.freeze * trapScale, 0.03, 0.14);
+    const attempts = state.hits + state.misses;
+
+    if (attempts < 3) {
+      return Math.random() < 0.18 ? "gold" : "normal";
+    }
+
+    const pressure = clamp(state.hits / 65 + state.combo / 120, 0, 0.38);
+    const dynamicTrapScale = trapScale * (1 + pressure);
+    const safeGold = clamp(rate.gold * (1 / Math.max(0.85, dynamicTrapScale)), 0.07, 0.16);
+    const bomb = clamp(rate.bomb * dynamicTrapScale, 0.07, 0.24);
+    const decoy = clamp(rate.decoy * dynamicTrapScale, 0.05, 0.2);
+    const freeze = clamp(rate.freeze * dynamicTrapScale, 0.03, 0.15);
     const r = Math.random();
     let cursor = safeGold;
     if (r < cursor) return "gold";
@@ -867,17 +895,6 @@
     });
   }
 
-  function updateSessionSummary() {
-    const mode = modes[selectedMode];
-    const difficulty = difficulties[selectedDifficulty];
-    const startLives = Math.max(1, mode.lives + difficulty.livesBonus);
-
-    if (els.summaryMode) els.summaryMode.textContent = mode.label;
-    if (els.summaryDifficulty) els.summaryDifficulty.textContent = difficulty.label;
-    if (els.summaryTime) els.summaryTime.textContent = `${mode.totalTime} 秒`;
-    if (els.summaryLives) els.summaryLives.textContent = `${startLives} ♥`;
-  }
-
   function updateControlState() {
     if (els.pauseTop) {
       els.pauseTop.disabled = !state.running;
@@ -887,7 +904,10 @@
 
   function updateHud() {
     const stats = getStats();
-    const progressToFever = state.fever ? 100 : clamp(((state.combo % FEVER_COMBO_STEP) / FEVER_COMBO_STEP) * 100, 0, 100);
+    const feverRemainingMs = state.fever ? Math.max(0, state.feverEndsAt - performance.now()) : 0;
+    const progressToFever = state.fever
+      ? clamp((feverRemainingMs / FEVER_DURATION) * 100, 0, 100)
+      : clamp(((state.combo % FEVER_COMBO_STEP) / FEVER_COMBO_STEP) * 100, 0, 100);
 
     if (els.score.textContent !== String(state.score)) {
       els.score.textContent = String(state.score);
@@ -903,7 +923,7 @@
     els.multiplier.textContent = `x${getMultiplier().toFixed(2)}`;
     els.accuracy.textContent = `${stats.accuracy}%`;
     els.energyFill.style.width = `${progressToFever}%`;
-    els.energyText.textContent = state.fever ? "FEVER" : `${Math.round(progressToFever)}%`;
+    els.energyText.textContent = state.fever ? `${Math.ceil(feverRemainingMs / 1000)}s` : `${Math.round(progressToFever)}%`;
     els.difficultyDisplay.textContent = difficulties[selectedDifficulty].label;
     updateControlState();
   }
@@ -966,6 +986,34 @@
       className: found[2],
       comment: found[3]
     };
+  }
+
+  function getResultAdvice(stats, rank) {
+    if (stats.attempts === 0) {
+      return "下一局先熟悉目標顏色，白色與金色可以點，其他顏色先避開。";
+    }
+
+    if (stats.accuracy < 70) {
+      return "建議下一局先放慢一點，不要急著追分，先把準確率拉到 80% 以上。";
+    }
+
+    if (state.worstMissStreak >= 3) {
+      return "連續失誤偏多，看到陷阱時先停半拍確認，穩住比亂點更容易拿高分。";
+    }
+
+    if (state.bestCombo < 12) {
+      return "可以把目標放在維持連擊，連擊穩定後倍率會上來，分數會自然提高。";
+    }
+
+    if (stats.avgReaction > 720 && stats.accuracy >= 80) {
+      return "準確率不錯，下一步可以挑戰更快反應，優先點金色目標延長時間。";
+    }
+
+    if (rank.score >= 84) {
+      return "這局表現很穩，已經可以挑戰更高難度或 Rush 模式。";
+    }
+
+    return "整體表現不錯，下一局可以優先保持 Combo，並在 Fever 前避免冒險點陷阱。";
   }
 
   function checkAchievements(reaction) {
