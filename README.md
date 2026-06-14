@@ -1,26 +1,67 @@
 # Precision Click / Reaction Arena
 
-HTML5 / CSS / JavaScript 製作的精準反應點擊遊戲。
+學生姓名：吳昇融  
+學號：U114B207  
+專案版本網址：https://wysandriel.github.io/Precision-Click/
 
-## 本版重點
+## 專案介紹
 
-- 手機版強化：固定外層畫面、卡片內部可滑、按鈕與目標更好點擊
-- 本局挑戰：每局提供 3 個小目標，提升重玩動機
-- XP 與玩家等級：結算後依分數、Rank、Combo、Fever 與任務完成度取得 XP
-- 連擊獎勵：連擊達到指定段數會額外加分，部分段數會加秒
-- Near Best 提示：接近最高分時會提醒玩家即將破紀錄
-- Fever Mode：維持原本 Fever 加成與剩餘秒數顯示
-- 結算回饋：顯示任務完成狀態、XP 獲得與下一局建議
+Precision Click 是一款使用 HTML、CSS、JavaScript 製作的網頁反應點擊遊戲。玩家需要在時間內快速點擊正確目標、避開陷阱、維持 Combo，並挑戰最高分。
+
+本版本針對第 15～16 週進行優化，重點放在遊戲機制、手機操作體驗、介面穩定度與重玩性。
+
+## 本次主要修改內容
+
+### 1. 手機版優化
+- 修正手機模式中部分介面滑動不到的問題
+- 保留外層遊戲畫面不亂滑
+- 規則、設定、結算畫面改為卡片內部可滑動
+- 加強手機瀏覽器高度判斷，減少網址列造成的畫面跳動
+- 放大手機按鈕與點擊區域
+- 調整手機版目標生成安全範圍，避免太靠近邊緣
+
+### 2. 遊戲機制優化
+- 新增本局挑戰任務
+- 新增 XP 與等級系統
+- 新增 Near Best 提示，接近最高分時提醒玩家
+- 強化 Combo 獎勵，提高玩家維持連擊的動機
+- 強化 Fever Mode 的提示與回饋
+
+### 3. 介面穩定性改善
+- 移除容易破版的本局摘要區塊
+- 規則說明只保留在一個地方，避免重複與混亂
+- 修正內部滾動與外部鎖定的衝突
+- 保持 GitHub Pages 可直接部署的單層檔案結構
+
+### 4. 遊戲結算改善
+- 結算畫面顯示任務完成狀態
+- 顯示 XP 獲得結果
+- 提供下一局簡短建議
+- 讓玩家更清楚自己本局表現與下一步目標
 
 ## 檔案結構
 
-```txt
-index.html
-style.css
-script.js
-README.md
+```text
+Precision-Click/
+├── index.html
+├── style.css
+├── script.js
+└── README.md
 ```
 
-## 部署方式
+## 使用方式
 
-直接上傳到 GitHub Repository 根目錄，開啟 GitHub Pages 即可遊玩。
+1. 將以上檔案上傳到 GitHub Repository 根目錄
+2. 到 Repository 的 Settings
+3. 找到 Pages
+4. Source 選擇 main branch / root
+5. 儲存後等待 GitHub Pages 部署完成
+
+## 技術使用
+
+- HTML5
+- CSS3
+- JavaScript
+- localStorage
+- requestAnimationFrame
+- GitHub Pages
